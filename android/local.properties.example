@@ -1,0 +1,3 @@
+# 이 파일을 local.properties 로 복사한 뒤 sdk.dir 경로를 맞추세요.
+# Android Studio 설치 후 기본 경로 (Mac):
+sdk.dir=/Users/본인맥유저명/Library/Android/sdk
