@@ -1,0 +1,44 @@
+diff --git a/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js b/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js
+index 8a2260f..83b9fc1 100644
+--- a/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js
++++ b/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js
+@@ -52,6 +52,12 @@ function _interopRequireWildcard(e, t) {
+ function _interopRequireDefault(e) {
+   return e && e.__esModule ? e : { default: e };
+ }
++function styleText(style, text) {
++  if (typeof _util.styleText === "function") {
++    return _util.styleText(style, text);
++  }
++  return text;
++}
+ async function runServer(_argv, cliConfig, args) {
+   const metroConfig = await (0, _loadMetroConfig.default)(cliConfig, {
+     config: args.config,
+@@ -75,7 +81,7 @@ async function runServer(_argv, cliConfig, args) {
+     port,
+   });
+   console.info(
+-    (0, _util.styleText)(
++    styleText(
+       "blue",
+       `\nWelcome to React Native v${cliConfig.reactNativeVersion}`,
+     ),
+@@ -91,7 +97,7 @@ async function runServer(_argv, cliConfig, args) {
+     return;
+   } else if (serverStatus === "port_taken") {
+     console.error(
+-      `${(0, _util.styleText)("red", "error")}: Another process is running on port ${port}. Please terminate this ` +
++      `${styleText("red", "error")}: Another process is running on port ${port}. Please terminate this ` +
+         'process and try again, or use another port with "--port".',
+     );
+     return;
+@@ -134,7 +140,7 @@ async function runServer(_argv, cliConfig, args) {
+         terminalReporter.update({
+           type: "unstable_server_log",
+           level: "info",
+-          data: `Dev server ready. ${(0, _util.styleText)("dim", "Press Ctrl+C to exit.")}`,
++          data: `Dev server ready. ${styleText("dim", "Press Ctrl+C to exit.")}`,
+         });
+         (0, _attachKeyHandlers.default)({
+           devServerUrl,

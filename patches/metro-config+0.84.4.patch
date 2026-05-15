@@ -1,0 +1,42 @@
+diff --git a/node_modules/metro-config/src/defaults/getMaxWorkers.js b/node_modules/metro-config/src/defaults/getMaxWorkers.js
+index 1a23754..7cc6a28 100644
+--- a/node_modules/metro-config/src/defaults/getMaxWorkers.js
++++ b/node_modules/metro-config/src/defaults/getMaxWorkers.js
+@@ -9,7 +9,10 @@ function _interopRequireDefault(e) {
+   return e && e.__esModule ? e : { default: e };
+ }
+ function getMaxWorkers(workers) {
+-  const cores = _os.default.availableParallelism();
++  const cores =
++    typeof _os.default.availableParallelism === "function"
++      ? _os.default.availableParallelism()
++      : _os.default.cpus().length;
+   return typeof workers === "number" && Number.isInteger(workers)
+     ? Math.min(cores, workers > 0 ? workers : 1)
+     : Math.max(1, Math.ceil(cores * (0.5 + 0.5 * Math.exp(-cores * 0.07)) - 1));
+diff --git a/node_modules/metro-config/src/loadConfig.js b/node_modules/metro-config/src/loadConfig.js
+index d6bd83a..f2a9751 100644
+--- a/node_modules/metro-config/src/loadConfig.js
++++ b/node_modules/metro-config/src/loadConfig.js
+@@ -197,14 +197,19 @@ async function mergeConfigAsync(baseConfig, ...reversedConfigs) {
+   }
+   return currentConfig;
+ }
++function arrayToReversed(arr) {
++  return typeof arr.toReversed === "function"
++    ? arr.toReversed()
++    : [...arr].reverse();
++}
+ function mergeConfig(base, ...configs) {
+   let currentConfig = typeof base === "function" ? base() : base;
+-  const reversedConfigs = configs.toReversed();
++  const reversedConfigs = arrayToReversed(configs);
+   let next;
+   while ((next = reversedConfigs.pop())) {
+     const nextConfig = typeof next === "function" ? next(currentConfig) : next;
+     if (nextConfig instanceof Promise) {
+-      return mergeConfigAsync(nextConfig, reversedConfigs.toReversed());
++      return mergeConfigAsync(nextConfig, arrayToReversed(reversedConfigs));
+     }
+     currentConfig = mergeConfigObjects(currentConfig, nextConfig);
+   }

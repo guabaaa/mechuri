@@ -1,0 +1,120 @@
+diff --git a/node_modules/metro/src/index.flow.js b/node_modules/metro/src/index.flow.js
+index d85ac1c..d581963 100644
+--- a/node_modules/metro/src/index.flow.js
++++ b/node_modules/metro/src/index.flow.js
+@@ -101,6 +101,12 @@ function _interopRequireWildcard(e, t) {
+ function _interopRequireDefault(e) {
+   return e && e.__esModule ? e : { default: e };
+ }
++function styleText(format, text) {
++  if (typeof _util.default.styleText === "function") {
++    return _util.default.styleText(format, text);
++  }
++  return text;
++}
+ const DEFAULTS = _Server.default.DEFAULT_BUNDLE_OPTIONS;
+ async function getConfig(config) {
+   const defaultConfig = await (0, _metroConfig.getDefaultConfig)(
+@@ -201,7 +207,7 @@ const runServer = async (
+   await earlyPortCheck(host, config.server.port);
+   if (secure != null || secureCert != null || secureKey != null) {
+     console.warn(
+-      _util.default.styleText(["inverse", "yellow", "bold"], " DEPRECATED "),
++      styleText(["inverse", "yellow", "bold"], " DEPRECATED "),
+       "The `secure`, `secureCert`, and `secureKey` options are now deprecated. " +
+         "Please use the `secureServerOptions` object instead to pass options to " +
+         "Metro's https development server, or `config.server.tls` in Metro's configuration",
+diff --git a/node_modules/metro/src/lib/TerminalReporter.js b/node_modules/metro/src/lib/TerminalReporter.js
+index 292a8ee..232ae03 100644
+--- a/node_modules/metro/src/lib/TerminalReporter.js
++++ b/node_modules/metro/src/lib/TerminalReporter.js
+@@ -41,7 +41,10 @@ function _interopRequireWildcard(e, t) {
+ function _interopRequireDefault(e) {
+   return e && e.__esModule ? e : { default: e };
+ }
+-const style = (format, text) => _util.default.styleText(format, text);
++const style = (format, text) =>
++  typeof _util.default.styleText === "function"
++    ? _util.default.styleText(format, text)
++    : text;
+ const DARK_BLOCK_CHAR = "\u2593";
+ const LIGHT_BLOCK_CHAR = "\u2591";
+ const MAX_PROGRESS_BAR_CHAR_WIDTH = 16;
+diff --git a/node_modules/metro/src/lib/logToConsole.js b/node_modules/metro/src/lib/logToConsole.js
+index c38e00f..2df9d19 100644
+--- a/node_modules/metro/src/lib/logToConsole.js
++++ b/node_modules/metro/src/lib/logToConsole.js
+@@ -8,6 +8,12 @@ var _util = _interopRequireDefault(require("util"));
+ function _interopRequireDefault(e) {
+   return e && e.__esModule ? e : { default: e };
+ }
++function styleText(format, text) {
++  if (typeof _util.default.styleText === "function") {
++    return _util.default.styleText(format, text);
++  }
++  return text;
++}
+ const groupStack = [];
+ let collapsedGuardTimer;
+ var _default = (terminal, level, ...data) => {
+@@ -26,7 +32,7 @@ var _default = (terminal, level, ...data) => {
+     collapsedGuardTimer = setTimeout(() => {
+       if (groupStack.includes("groupCollapsed")) {
+         terminal.log(
+-          _util.default.styleText(["inverse", "yellow", "bold"], " WARN "),
++          styleText(["inverse", "yellow", "bold"], " WARN "),
+           "Expected `console.groupEnd` to be called after `console.groupCollapsed`.",
+         );
+         groupStack.length = 0;
+@@ -46,7 +52,7 @@ var _default = (terminal, level, ...data) => {
+       data[data.length - 1] = lastItem.trimEnd();
+     }
+     terminal.log(
+-      _util.default.styleText(
++      styleText(
+         [...color, "bold"],
+         ` ${logFunction.toUpperCase()} `,
+       ) + "".padEnd(groupStack.length * 2, " "),
+diff --git a/node_modules/metro/src/lib/reporting.js b/node_modules/metro/src/lib/reporting.js
+index 949395d..2cbf54d 100644
+--- a/node_modules/metro/src/lib/reporting.js
++++ b/node_modules/metro/src/lib/reporting.js
+@@ -12,6 +12,12 @@ var _util = _interopRequireDefault(require("util"));
+ function _interopRequireDefault(e) {
+   return e && e.__esModule ? e : { default: e };
+ }
++function styleText(format, text) {
++  if (typeof _util.default.styleText === "function") {
++    return _util.default.styleText(format, text);
++  }
++  return text;
++}
+ const supportsColor = () =>
+   process.stdout instanceof _tty.default.WriteStream &&
+   process.stdout.hasColors();
+@@ -19,14 +25,14 @@ function logWarning(terminal, format, ...args) {
+   const str = _util.default.format(format, ...args);
+   terminal.log(
+     "%s %s",
+-    _util.default.styleText(["yellow", "inverse", "bold"], " WARN "),
++    styleText(["yellow", "inverse", "bold"], " WARN "),
+     str,
+   );
+ }
+ function logError(terminal, format, ...args) {
+   terminal.log(
+     "%s %s",
+-    _util.default.styleText(["red", "inverse", "bold"], " ERROR "),
++    styleText(["red", "inverse", "bold"], " ERROR "),
+     _util.default.format(
+       supportsColor() ? format : _util.default.stripVTControlCharacters(format),
+       ...args,
+@@ -37,7 +43,7 @@ function logInfo(terminal, format, ...args) {
+   const str = _util.default.format(format, ...args);
+   terminal.log(
+     "%s %s",
+-    _util.default.styleText(["cyan", "inverse", "bold"], " INFO "),
++    styleText(["cyan", "inverse", "bold"], " INFO "),
+     str,
+   );
+ }
