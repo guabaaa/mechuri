@@ -5,7 +5,8 @@ services:
     runtime: node
     rootDir: server
     plan: starter
-    buildCommand: yarn install && yarn build
+    # NODE_ENV=production 이면 devDependencies(tsc)가 빠져 TS 6이 돌아감
+    buildCommand: YARN_PRODUCTION=false yarn install && yarn build
     startCommand: yarn start
     envVars:
       - key: NODE_ENV
