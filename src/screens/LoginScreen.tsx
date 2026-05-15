@@ -6,7 +6,6 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -38,7 +37,6 @@ const ROWS: SocialRow[] = [
 
 export default function LoginScreen() {
   const theme = useAppTheme();
-  const isDark = useColorScheme() === 'dark';
   const { signIn } = useAuth();
   const [busy, setBusy] = useState<AuthProviderId | null>(null);
 
@@ -55,15 +53,14 @@ export default function LoginScreen() {
     <SafeAreaView
       style={[styles.safe, { backgroundColor: theme.bg }]}
       edges={['top', 'bottom', 'left', 'right']}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle="dark-content" />
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled">
         <Text style={[styles.brand, { color: theme.sub }]}>메뉴추천리스트</Text>
         <Text style={[styles.logo, { color: theme.text }]}>메추리</Text>
         <Text style={[styles.tagline, { color: theme.sub }]}>
-          매일 뭐 먹을지 고민하는 직장인과 자영업자를 위해, 심리테스트·운세·게임
-          방식으로 오늘의 메뉴를 추천해요.
+          오늘 뭐 먹지? 메추리가 골라줄게요
         </Text>
 
         <View style={styles.block}>
@@ -77,13 +74,7 @@ export default function LoginScreen() {
           {ROWS.map((row) => {
             const bg = theme[row.bg];
             const fg =
-              row.fg === 'dark'
-                ? theme.googleText
-                : isDark && row.id === 'apple'
-                  ? '#000'
-                  : row.id === 'apple'
-                    ? '#fff'
-                    : '#fff';
+              row.fg === 'dark' ? theme.googleText : row.id === 'apple' ? '#fff' : '#fff';
             return (
               <Pressable
                 key={row.id}

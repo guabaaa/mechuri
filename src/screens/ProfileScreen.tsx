@@ -1,15 +1,7 @@
-import {
-  Pressable,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { QuailMascot, ScreenContainer } from '../components';
 import { useAuth } from '../context/AuthContext';
-import { useAppTheme } from '../theme';
+import { colors } from '../theme';
 
 const PROVIDER_LABEL: Record<string, string> = {
   kakao: '카카오',
@@ -20,78 +12,65 @@ const PROVIDER_LABEL: Record<string, string> = {
 };
 
 export default function ProfileScreen() {
-  const theme = useAppTheme();
-  const isDark = useColorScheme() === 'dark';
   const { user, signOut } = useAuth();
 
   return (
-    <SafeAreaView
-      style={[styles.safe, { backgroundColor: theme.bg }]}
-      edges={['top', 'left', 'right']}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={[styles.head, { color: theme.text }]}>내 정보</Text>
+    <ScreenContainer>
+      <Text style={styles.title}>마이페이지</Text>
+
+      <View style={styles.hero}>
+        <QuailMascot size="sm" />
         {user ? (
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: theme.card, borderColor: theme.border },
-            ]}>
-            <Text style={[styles.label, { color: theme.sub }]}>닉네임</Text>
-            <Text style={[styles.value, { color: theme.text }]}>
-              {user.nickname}
+          <>
+            <Text style={styles.nickname}>{user.nickname}</Text>
+            <Text style={styles.provider}>
+              {PROVIDER_LABEL[user.provider] ?? user.provider} 로그인
             </Text>
-            <Text style={[styles.label, { color: theme.sub, marginTop: 14 }]}>
-              로그인 방식
-            </Text>
-            <Text style={[styles.value, { color: theme.text }]}>
-              {PROVIDER_LABEL[user.provider] ?? user.provider}
-            </Text>
-          </View>
+          </>
         ) : null}
+      </View>
 
-        <Text style={[styles.section, { color: theme.text }]}>메뉴추천리스트</Text>
-        <Text style={[styles.body, { color: theme.sub }]}>
-          매일 뭐 먹을지 고민하는 직장인과 자영업자를 위해, 심리테스트·운세·게임
-          방식으로 오늘의 메뉴를 추천해주는 음식 선택 앱, 메추리예요.
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>메추리 소개</Text>
+        <Text style={styles.body}>
+          오늘 뭐 먹지? 메추리가 골라줄게요. 점메추를 귀엽고 게임처럼 즐길 수
+          있는 점심 메뉴 추천 앱이에요.
         </Text>
+      </View>
 
-        <Pressable
-          onPress={() => signOut()}
-          style={({ pressed }) => [
-            styles.logout,
-            { borderColor: theme.danger },
-            pressed && { opacity: 0.85 },
-          ]}>
-          <Text style={[styles.logoutLabel, { color: theme.danger }]}>
-            로그아웃
-          </Text>
-        </Pressable>
-      </ScrollView>
-    </SafeAreaView>
+      <Pressable onPress={() => signOut()} style={styles.logout}>
+        <Text style={styles.logoutLabel}>로그아웃</Text>
+      </Pressable>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  scroll: { padding: 22, paddingBottom: 40 },
-  head: { fontSize: 24, fontWeight: '800', marginBottom: 16 },
+  title: { fontSize: 26, fontWeight: '900', color: colors.brown, marginTop: 8 },
+  hero: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginVertical: 16,
+  },
+  nickname: { fontSize: 20, fontWeight: '900', color: colors.brown, marginTop: 12 },
+  provider: { fontSize: 14, color: colors.taupe, marginTop: 4 },
   card: {
+    backgroundColor: colors.white,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
+    borderColor: colors.brown,
     padding: 18,
     marginBottom: 24,
   },
-  label: { fontSize: 13, marginBottom: 4 },
-  value: { fontSize: 18, fontWeight: '700' },
-  section: { fontSize: 17, fontWeight: '700', marginBottom: 8 },
-  body: { fontSize: 14, lineHeight: 22, marginBottom: 28 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: colors.brown, marginBottom: 8 },
+  body: { fontSize: 14, lineHeight: 22, color: colors.taupe },
   logout: {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
     borderWidth: 2,
+    borderColor: colors.red,
+    borderRadius: 24,
     paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingHorizontal: 32,
   },
-  logoutLabel: { fontWeight: '700', fontSize: 16 },
+  logoutLabel: { fontSize: 16, fontWeight: '800', color: colors.red },
 });

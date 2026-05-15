@@ -1,111 +1,132 @@
-import { useCallback, useState } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { fetchTodayMenu } from '../api/menusApi';
+import { diceIcon } from '../assets';
 import {
-  Pressable,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ALL_MENUS, pickRandom, TODAY_MESSAGES } from '../data/menus';
-import { useAppTheme } from '../theme';
+  FeatureActionButton,
+  MenuRevealOverlay,
+  QuailMascot,
+  ScreenContainer,
+} from '../components';
+import { useMenuReveal } from '../hooks/useMenuReveal';
+import type { HomeStackParamList } from '../navigation/types';
+import { colors, homeTileTints } from '../theme';
+import { fonts } from '../theme/typography';
 
-export default function TodayScreen() {
-  const theme = useAppTheme();
-  const isDark = useColorScheme() === 'dark';
-  const [menu, setMenu] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string>('');
+type Props = NativeStackScreenProps<HomeStackParamList, 'TodayPick'>;
 
-  const recommend = useCallback(() => {
-    setMenu((prev) => pickRandom(ALL_MENUS, prev ?? undefined));
-    setMsg(TODAY_MESSAGES[Math.floor(Math.random() * TODAY_MESSAGES.length)]!);
-  }, []);
+export default function TodayScreen({ navigation }: Props) {
+  const { phase, error, run, finishReveal, isBusy } = useMenuReveal();
+
+  const pickRandom = async () => {
+    await run(async () => {
+      const { menu, message } = await fetchTodayMenu();
+      return { menu, message };
+    });
+  };
+
+  const onRevealDone = () => {
+    finishReveal(({ menu, message }) => {
+      navigation.replace('MenuResult', {
+        menu,
+        message,
+        source: 'today',
+      });
+    });
+  };
 
   return (
-    <SafeAreaView
-      style={[styles.safe, { backgroundColor: theme.bg }]}
-      edges={['top', 'left', 'right']}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled">
-        <Text style={[styles.brand, { color: theme.sub }]}>메뉴추천리스트</Text>
-        <Text style={[styles.title, { color: theme.text }]}>메추리</Text>
-        <Text style={[styles.tagline, { color: theme.sub }]}>
-          매일 뭐 먹을지 고민하는 직장인과 자영업자를 위해, 심리테스트·운세·게임
-          방식으로 오늘의 메뉴를 추천해요.
-        </Text>
-
-        <Text style={[styles.section, { color: theme.text }]}>
-          오늘의 메뉴 추천
-        </Text>
-        <Text style={[styles.desc, { color: theme.sub }]}>
-          버튼 한 번이면 오늘의 한 끼를 골라 드릴게요.
-        </Text>
-
-        <Pressable
-          onPress={recommend}
-          style={({ pressed }) => [
-            styles.button,
-            { backgroundColor: theme.accent },
-            pressed && styles.pressed,
-          ]}>
-          <Text style={[styles.buttonLabel, { color: '#fff' }]}>
-            오늘의 메뉴 받기
-          </Text>
+    <View style={styles.root}>
+      <ScreenContainer>
+        <Pressable onPress={() => navigation.goBack()} style={styles.back}>
+          <Text style={styles.backText}>← 홈</Text>
         </Pressable>
 
-        {menu != null ? (
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: theme.card,
-                borderColor: theme.border,
-                shadowColor: theme.text,
-              },
-            ]}>
-            <Text style={[styles.cardKicker, { color: theme.sub }]}>
-              오늘의 추천 메뉴
-            </Text>
-            <Text style={[styles.menuName, { color: theme.text }]}>{menu}</Text>
-            <Text style={[styles.cardMsg, { color: theme.sub }]}>{msg}</Text>
-          </View>
-        ) : null}
-      </ScrollView>
-    </SafeAreaView>
+        <View style={styles.hero}>
+          <QuailMascot size="md" />
+          <Text style={styles.head}>오늘 메뉴 뽑기</Text>
+          <Text style={styles.sub}>어떻게 골라볼까요?</Text>
+        </View>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <View style={styles.actions}>
+          <FeatureActionButton
+            label="무작정 뽑기"
+            iconImage={diceIcon}
+            tint={homeTileTints.menu}
+            loading={phase === 'loading'}
+            disabled={isBusy}
+            onPress={pickRandom}
+          />
+          <FeatureActionButton
+            label="골라서 뽑기"
+            icon="🎯"
+            tint={homeTileTints.mbti}
+            disabled={isBusy}
+            onPress={() => navigation.navigate('MenuChoose')}
+          />
+          <FeatureActionButton
+            label="배달 메뉴 뽑기"
+            icon="🛵"
+            tint={homeTileTints.delivery}
+            disabled={isBusy}
+            onPress={() => navigation.navigate('DeliveryPick')}
+          />
+        </View>
+
+        <Text style={styles.hint}>
+          무작정·골라서·배달 중 골라서 메추리에게 맡겨보세요
+        </Text>
+      </ScreenContainer>
+
+      {phase === 'reveal' ? (
+        <MenuRevealOverlay onComplete={onRevealDone} />
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  scroll: { paddingHorizontal: 22, paddingBottom: 32, paddingTop: 8 },
-  brand: { fontSize: 13, letterSpacing: 1.2, marginBottom: 4 },
-  title: { fontSize: 34, fontWeight: '800', marginBottom: 10 },
-  tagline: { fontSize: 15, lineHeight: 22, marginBottom: 28 },
-  section: { fontSize: 20, fontWeight: '700', marginBottom: 6 },
-  desc: { fontSize: 15, lineHeight: 22, marginBottom: 18 },
-  button: {
-    alignSelf: 'flex-start',
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    borderRadius: 12,
+  root: { flex: 1 },
+  back: { marginTop: 4, marginBottom: 8, alignSelf: 'flex-start' },
+  backText: {
+    fontFamily: fonts.body,
+    fontSize: 15,
+    color: colors.tileText,
   },
-  pressed: { opacity: 0.9 },
-  buttonLabel: { fontSize: 16, fontWeight: '700' },
-  card: {
-    marginTop: 22,
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+  hero: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 24,
   },
-  cardKicker: { fontSize: 13, marginBottom: 6 },
-  menuName: { fontSize: 26, fontWeight: '800', marginBottom: 10 },
-  cardMsg: { fontSize: 15, lineHeight: 22 },
+  head: {
+    fontFamily: fonts.display,
+    fontSize: 24,
+    color: colors.brown,
+    marginTop: 12,
+  },
+  sub: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.taupe,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  actions: { gap: 14, marginTop: 4, marginBottom: 8 },
+  hint: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.taupe,
+    textAlign: 'center',
+    marginTop: 16,
+    lineHeight: 20,
+  },
+  error: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.red,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
 });

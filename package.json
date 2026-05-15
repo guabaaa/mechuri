@@ -3,17 +3,23 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "postinstall": "patch-package",
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "start": "react-native start",
+    "postinstall": "patch-package && bash scripts/link-fonts.sh && bash scripts/optimize-images.sh",
+    "android": "bash scripts/run-react-native.sh run-android",
+    "android:shell": "bash scripts/run-android.sh",
+    "ios": "bash scripts/run-react-native.sh run-ios",
+    "ios:pods": "cd ios && bundle install && bundle exec pod install",
+    "ios:shell": "bash scripts/run-ios.sh",
+    "start": "bash scripts/run-react-native.sh start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage",
-    "validate": "yarn typecheck && yarn lint && yarn test"
+    "validate": "yarn typecheck && yarn lint && yarn test",
+    "server": "yarn --cwd server dev",
+    "server:install": "yarn --cwd server install",
+    "server:test": "yarn --cwd server test"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^3.0.2",
@@ -24,7 +30,8 @@
     "react-native": "0.85.3",
     "react-native-gesture-handler": "^2.31.2",
     "react-native-safe-area-context": "^5.5.2",
-    "react-native-screens": "^4.25.0"
+    "react-native-screens": "^4.25.0",
+    "react-native-video": "^6.19.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

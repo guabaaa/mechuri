@@ -1,3 +1,33 @@
+diff --git a/node_modules/@react-native/community-cli-plugin/dist/commands/start/attachKeyHandlers.js b/node_modules/@react-native/community-cli-plugin/dist/commands/start/attachKeyHandlers.js
+index e99086b..5703d7c 100644
+--- a/node_modules/@react-native/community-cli-plugin/dist/commands/start/attachKeyHandlers.js
++++ b/node_modules/@react-native/community-cli-plugin/dist/commands/start/attachKeyHandlers.js
+@@ -14,6 +14,12 @@ var _util = require("util");
+ function _interopRequireDefault(e) {
+   return e && e.__esModule ? e : { default: e };
+ }
++function styleText(styles, text) {
++  if (typeof _util.styleText === "function") {
++    return _util.styleText(styles, text);
++  }
++  return text;
++}
+ const CTRL_C = "\u0003";
+ const CTRL_D = "\u0004";
+ const RELOAD_TIMEOUT = 500;
+@@ -88,9 +94,9 @@ function attachKeyHandlers({ devServerUrl, messageSocket, reporter }) {
+     level: "info",
+     data: `Key commands available:
+ 
+-  ${(0, _util.styleText)(["bold", "inverse"], " r ")} - reload app(s)
+-  ${(0, _util.styleText)(["bold", "inverse"], " d ")} - open Dev Menu
+-  ${(0, _util.styleText)(["bold", "inverse"], " j ")} - open DevTools
++  ${styleText(["bold", "inverse"], " r ")} - reload app(s)
++  ${styleText(["bold", "inverse"], " d ")} - open Dev Menu
++  ${styleText(["bold", "inverse"], " j ")} - open DevTools
+ `,
+   });
+ }
 diff --git a/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js b/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js
 index 8a2260f..83b9fc1 100644
 --- a/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js

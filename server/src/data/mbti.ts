@@ -4,7 +4,6 @@ export type MbtiQuestion = {
   options: { id: string; label: string; persona: string }[];
 };
 
-/** 간단 심리테스트 — 결과는 persona 키로 매핑 */
 export const MBTI_QUESTIONS: MbtiQuestion[] = [
   {
     id: 'q1',
@@ -61,7 +60,7 @@ export const PERSONA_RESULTS: Record<
   { title: string; body: string; menus: string[] }
 > = {
   hearty: {
-    title: '든든한 국밥형 인간',
+    title: '국밥 안정형',
     body:
       '배고픔을 참지 못하고, 메뉴 선택에서 실패를 싫어하는 타입이에요. 오늘도 힘내요.',
     menus: ['돼지국밥', '순대국', '설렁탕'],

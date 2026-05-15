@@ -75,6 +75,34 @@ index c38e00f..2df9d19 100644
          [...color, "bold"],
          ` ${logFunction.toUpperCase()} `,
        ) + "".padEnd(groupStack.length * 2, " "),
+diff --git a/node_modules/metro/src/lib/parseBundleOptionsFromBundleRequestUrl.js b/node_modules/metro/src/lib/parseBundleOptionsFromBundleRequestUrl.js
+index 85056c7..730bdec 100644
+--- a/node_modules/metro/src/lib/parseBundleOptionsFromBundleRequestUrl.js
++++ b/node_modules/metro/src/lib/parseBundleOptionsFromBundleRequestUrl.js
+@@ -61,11 +61,22 @@ const getTransformProfile = (transformProfile) =>
+   transformProfile === "hermes-stable" || transformProfile === "hermes-canary"
+     ? transformProfile
+     : "default";
++function urlCanParse(input, base) {
++  if (typeof URL.canParse === "function") {
++    return URL.canParse(input, base);
++  }
++  try {
++    new URL(input, base);
++    return true;
++  } catch {
++    return false;
++  }
++}
+ function parseBundleOptionsFromBundleRequestUrl(
+   rawNonJscSafeUrlEncodedUrl,
+   platforms,
+ ) {
+-  if (!URL.canParse(rawNonJscSafeUrlEncodedUrl, RESOLVE_BASE_URL)) {
++  if (!urlCanParse(rawNonJscSafeUrlEncodedUrl, RESOLVE_BASE_URL)) {
+     throw new Error("Invalid URL", {
+       cause: rawNonJscSafeUrlEncodedUrl,
+     });
 diff --git a/node_modules/metro/src/lib/reporting.js b/node_modules/metro/src/lib/reporting.js
 index 949395d..2cbf54d 100644
 --- a/node_modules/metro/src/lib/reporting.js

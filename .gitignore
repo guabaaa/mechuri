@@ -35,9 +35,13 @@ local.properties
 !debug.keystore
 .kotlin/
 
+# Local API override (real device)
+src/config/api.local.ts
+
 # node.js
 #
 node_modules/
+server/dist/
 npm-debug.log
 yarn-error.log
 

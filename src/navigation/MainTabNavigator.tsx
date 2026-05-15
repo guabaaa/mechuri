@@ -1,36 +1,18 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet, Text } from 'react-native';
-import {
-  FortuneScreen,
-  MbtiScreen,
-  ProfileScreen,
-  RouletteScreen,
-  SituationScreen,
-  TodayScreen,
-} from '../screens';
-
-export type MainTabParamList = {
-  Today: undefined;
-  Mbti: undefined;
-  Fortune: undefined;
-  Roulette: undefined;
-  Situation: undefined;
-  Profile: undefined;
-};
+import { NearbyPickScreen, ProfileScreen } from '../screens';
+import { colors } from '../theme';
+import { fonts } from '../theme/typography';
+import type { MainTabParamList } from './types';
+import HomeStackNavigator from './HomeStackNavigator';
+import RecipeStackNavigator from './RecipeStackNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const TAB_LABEL: Record<keyof MainTabParamList, string> = {
-  Today: '오늘',
-  Mbti: '테스트',
-  Fortune: '운세',
-  Roulette: '룰렛',
-  Situation: '상황',
-  Profile: '내정보',
-};
-
-function ProfileTabIcon() {
-  return <Text style={styles.profileIcon}>👤</Text>;
+function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
+  return (
+    <Text style={[styles.icon, focused && styles.iconFocused]}>{emoji}</Text>
+  );
 }
 
 export default function MainTabNavigator() {
@@ -38,39 +20,41 @@ export default function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarActiveTintColor: colors.brown,
+        tabBarInactiveTintColor: colors.taupe,
+        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabLabel,
       }}>
       <Tab.Screen
-        name="Today"
-        component={TodayScreen}
-        options={{ tabBarLabel: TAB_LABEL.Today }}
+        name="HomeTab"
+        component={HomeStackNavigator}
+        options={{
+          tabBarLabel: '홈',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
+        }}
       />
       <Tab.Screen
-        name="Mbti"
-        component={MbtiScreen}
-        options={{ tabBarLabel: TAB_LABEL.Mbti }}
+        name="Nearby"
+        component={NearbyPickScreen}
+        options={{
+          tabBarLabel: '근처',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="📍" focused={focused} />,
+        }}
       />
       <Tab.Screen
-        name="Fortune"
-        component={FortuneScreen}
-        options={{ tabBarLabel: TAB_LABEL.Fortune }}
-      />
-      <Tab.Screen
-        name="Roulette"
-        component={RouletteScreen}
-        options={{ tabBarLabel: TAB_LABEL.Roulette }}
-      />
-      <Tab.Screen
-        name="Situation"
-        component={SituationScreen}
-        options={{ tabBarLabel: TAB_LABEL.Situation }}
+        name="RecipeTab"
+        component={RecipeStackNavigator}
+        options={{
+          tabBarLabel: '레시피',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="📖" focused={focused} />,
+        }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: TAB_LABEL.Profile,
-          tabBarIcon: ProfileTabIcon,
+          tabBarLabel: '마이페이지',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
         }}
       />
     </Tab.Navigator>
@@ -78,5 +62,18 @@ export default function MainTabNavigator() {
 }
 
 const styles = StyleSheet.create({
-  profileIcon: { fontSize: 16 },
+  tabBar: {
+    backgroundColor: colors.white,
+    borderTopWidth: 2,
+    borderTopColor: colors.brown,
+    height: 64,
+    paddingBottom: 8,
+    paddingTop: 6,
+  },
+  tabLabel: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+  },
+  icon: { fontSize: 22, opacity: 0.6 },
+  iconFocused: { opacity: 1 },
 });

@@ -1,97 +1,112 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🐥 메추리
 
-# Getting Started
+> 오늘 뭐 먹지?  
+> 메추리가 점심 메뉴를 골라줄게요.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+메추리는 직장인과 자영업자의 점심 메뉴 고민을 줄여주는  
+**게임형 메뉴 추천 앱**입니다.
 
-## Step 1: Start Metro
+랜덤 추천, 음식 성향 테스트, 밥운세, 룰렛 기능을 통해  
+메뉴 선택을 가볍고 재미있게 해결하는 것이 목표입니다.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+---
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 핵심 기능
 
-```sh
-# Using npm
-npm start
+### 1. 오늘의 메뉴 추천
 
-# OR using Yarn
-yarn start
-```
+사용자의 기분/상황에 따라 메뉴를 추천합니다.
 
-## Step 2: Build and run your app
+예시 선택지:
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+- 가볍게
+- 든든하게
+- 매콤하게
+- 랜덤으로
 
-### Android
+---
 
-```sh
-# Using npm
-npm run android
+### 2. 음식 성향 테스트
 
-# OR using Yarn
-yarn android
-```
+MBTI처럼 간단한 질문에 답하면 음식 성향을 분석합니다.
 
-### iOS
+예시 결과:
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+- 국밥 안정형
+- 제육 추진형
+- 샐러드 관리형
+- 돈까스 행복형
+- 마라 모험형
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+---
 
-```sh
-bundle install
-```
+### 3. 오늘의 밥운세
 
-Then, and every time you update your native dependencies, run:
+운세처럼 오늘의 메뉴를 추천합니다.
 
-```sh
-bundle exec pod install
-```
+제공 정보:
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+- 음식 운세 점수
+- 행운의 메뉴
+- 행운의 색깔
+- 추천 한마디
 
-```sh
-# Using npm
-npm run ios
+---
 
-# OR using Yarn
-yarn ios
-```
+### 4. 메뉴 룰렛
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+여러 메뉴 후보 중 하나를 룰렛으로 결정합니다.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+예시 카테고리:
 
-## Step 3: Modify your app
+- 한식
+- 중식
+- 일식
+- 양식
+- 분식
+- 패스트푸드
 
-Now that you have successfully run the app, let's make changes!
+---
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## MVP 범위
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+초기 버전에서는 아래 기능만 구현합니다.
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+- 홈 화면
+- 오늘의 메뉴 추천
+- 음식 성향 테스트
+- 테스트 결과 화면
+- 오늘의 밥운세
+- 메뉴 룰렛
+- 결과 공유하기
 
-## Congratulations! :tada:
+---
 
-You've successfully run and modified your React Native App. :partying_face:
+## 제외 기능
 
-### Now what?
+초기 MVP에서는 제외합니다.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+- 로그인
+- 실제 위치 기반 식당 추천
+- 배달앱 연동
+- 팀 투표방
+- 광고 관리자
+- 결제 기능
 
-# Troubleshooting
+---
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## 디자인 컨셉
 
-# Learn More
+메추리는 `메뉴 추천`의 줄임말이면서  
+귀여운 메추리 캐릭터로 확장 가능한 브랜드입니다.
 
-To learn more about React Native, take a look at the following resources:
+### 메인 컬러
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+```css
+--color-primary: #FFD84D;
+--color-primary-deep: #FFB020;
+--color-background: #FFF9EC;
+--color-text-main: #3A2A1A;
+--color-text-sub: #8A7A68;
+--color-point: #FF5A3D;
+--color-game: #7C5CFF;
