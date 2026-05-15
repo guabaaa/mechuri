@@ -1,7 +1,6 @@
+import { DELIVERY_BRAND_MESSAGES, DELIVERY_BRANDS } from '../data/deliveryBrands';
 import {
   ALL_MENUS,
-  DELIVERY_MESSAGES,
-  DELIVERY_MENUS,
   ROULETTE_POOL,
   TODAY_MESSAGES,
 } from '../data/menus';
@@ -17,15 +16,17 @@ export function getMenuPool() {
   return {
     menus: [...ALL_MENUS],
     roulettePool: [...ROULETTE_POOL],
-    deliveryPool: [...DELIVERY_MENUS],
+    deliveryPool: [...DELIVERY_BRANDS],
   };
 }
 
 export function pickDeliveryMenu(exclude?: string) {
-  const menu = pickRandom(DELIVERY_MENUS, exclude);
+  const brand = pickRandom(DELIVERY_BRANDS, exclude);
   const message =
-    DELIVERY_MESSAGES[Math.floor(Math.random() * DELIVERY_MESSAGES.length)]!;
-  return { menu, message };
+    DELIVERY_BRAND_MESSAGES[
+      Math.floor(Math.random() * DELIVERY_BRAND_MESSAGES.length)
+    ]!;
+  return { menu: brand, message, kind: 'brand' as const };
 }
 
 export function pickTodayMenu(exclude?: string) {

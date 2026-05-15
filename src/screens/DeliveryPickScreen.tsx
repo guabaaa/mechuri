@@ -45,22 +45,18 @@ export default function DeliveryPickScreen({ navigation }: Props) {
           <QuailMascot size="md" />
           <Text style={styles.head}>배달 메뉴 뽑기</Text>
           <Text style={styles.sub}>
-            배달 뭐시키지? 고민하지 마세요.{'\n'}메추리가 골라줄게요.
+            치킨·피자·카페까지,{'\n'}배달 브랜드를 골라드려요.
           </Text>
         </View>
 
-        {/* <View style={styles.tags}>
-          {['마라탕', '훠궈', '닭발', '곱창', '치킨', '피자'].map(tag => (
-            <View key={tag} style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
-            </View>
-          ))}
-        </View> */}
+        <Text style={styles.disclaimer}>
+          상호명은 참고용이며, 메추리와 각 브랜드는 제휴 관계가 아니에요.
+        </Text>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <FeatureActionButton
-          label="배달 메뉴 받기"
+          label="배달 브랜드 뽑기"
           icon="🛵"
           tint={homeTileTints.delivery}
           loading={phase === 'loading'}
@@ -105,6 +101,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  disclaimer: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: colors.taupe,
+    textAlign: 'center',
+    lineHeight: 16,
+    marginBottom: 20,
+    paddingHorizontal: 8,
   },
   tags: {
     flexDirection: 'row',

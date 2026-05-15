@@ -37,6 +37,7 @@ local.properties
 
 # Local API override (real device)
 src/config/api.local.ts
+src/config/auth.local.ts
 
 # node.js
 #

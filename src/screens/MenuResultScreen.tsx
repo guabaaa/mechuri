@@ -32,7 +32,7 @@ function ribbonLabel(
     return '상황 맞춤 메뉴';
   }
   if (source === 'delivery') {
-    return '배달 추천 메뉴';
+    return '배달 브랜드 추천';
   }
   return '오늘의 추천 메뉴';
 }
@@ -138,6 +138,12 @@ export default function MenuResultScreen({ navigation, route }: Props) {
 
           <Text style={styles.sparkleBottom}>🍚 ✨</Text>
         </View>
+
+        {source === 'delivery' ? (
+          <Text style={styles.disclaimer}>
+            상호명은 참고용이며, 메추리와 각 브랜드는 제휴 관계가 아니에요.
+          </Text>
+        ) : null}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -310,6 +316,15 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     color: colors.tileText,
     textAlign: 'center',
+  },
+  disclaimer: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: colors.taupe,
+    textAlign: 'center',
+    lineHeight: 16,
+    marginBottom: 14,
+    paddingHorizontal: 12,
   },
   error: {
     fontFamily: fonts.body,

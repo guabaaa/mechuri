@@ -25,6 +25,20 @@ export type FortuneResult = {
 export type MenuPickResult = {
   menu: string;
   message: string;
+  kind?: 'brand' | 'menu';
+};
+
+export type AuthProviderId = 'kakao' | 'naver' | 'apple' | 'google' | 'guest';
+
+export type AuthUser = {
+  id: string;
+  provider: AuthProviderId;
+  nickname: string;
+};
+
+export type AuthSession = {
+  token: string;
+  user: AuthUser;
 };
 
 export type SituationSummary = {

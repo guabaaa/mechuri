@@ -79,46 +79,4 @@ export const TODAY_MESSAGES = [
 
 export const ROULETTE_POOL = ALL_MENUS.slice(0, 24);
 
-/** 배달·야식·요즘 핫한 메뉴 */
-export const DELIVERY_MENUS = [
-  '마라탕',
-  '마라샹궈',
-  '훠궈',
-  '마라훠궈',
-  '닭발',
-  '불닭발',
-  '곱창볶음',
-  '대창구이',
-  '족발',
-  '보쌈',
-  '치킨',
-  '양념치킨',
-  '피자',
-  '떡볶이·튀김',
-  '로제떡볶이',
-  '찜닭',
-  '감자탕',
-  '부대찌개',
-  '샤브샤브',
-  '쌀국수',
-  '쌀순대',
-  '야식 세트',
-  '회덮밥',
-  '규동',
-  '제육덮밥',
-  '순대국',
-  '짬뽕',
-  '짜장면',
-  '버거',
-  '타코',
-  '분짜',
-] as const;
-
-export const DELIVERY_MESSAGES = [
-  '오늘은 집에서 편하게, 배달 한 번 어때요?',
-  '요즘 핫한 메뉴 중에서 골라봤어요!',
-  '야식 각 나오는 날, 든든하게 가요.',
-  '매콤한 게 땡길 때 딱이에요.',
-  '친구랑 나눠 먹기 좋은 배달 메뉴예요.',
-  '퇴근 후 리워드 한 끼, 이거 어때요?',
-];
+export { DELIVERY_BRANDS as DELIVERY_MENUS, DELIVERY_BRAND_MESSAGES as DELIVERY_MESSAGES } from './deliveryBrands';

@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../config/api';
+import { getAuthToken } from './authToken';
 import type { ApiErrorBody } from './types';
 
 export class ApiError extends Error {
@@ -19,10 +20,12 @@ export async function apiRequest<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
+  const token = getAuthToken();
   const res = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers ?? {}),
     },
   });

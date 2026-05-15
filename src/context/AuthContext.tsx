@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {
+import {
   createContext,
   useCallback,
   useContext,
@@ -7,14 +7,18 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { fetchMe, logout as logoutApi, socialSignIn } from '../api/authApi';
+import { ApiError } from '../api/client';
+import { setAuthToken } from '../api/authToken';
+import { obtainSocialCredential, signOutSocialSdks } from '../auth/socialAuth';
+import { SocialAuthError } from '../auth/SocialAuthError';
+import type { AuthProviderId, AuthUser } from '../api/types';
 
-const STORAGE_KEY = 'mechuri-auth-v1';
+const STORAGE_KEY = 'mechuri-auth-v2';
 
-export type AuthProviderId = 'kakao' | 'naver' | 'apple' | 'google' | 'guest';
-
-export type AuthUser = {
-  provider: AuthProviderId;
-  nickname: string;
+type StoredAuth = {
+  token: string;
+  user: AuthUser;
 };
 
 type AuthContextValue = {
@@ -26,34 +30,45 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const PROVIDER_PREFIX: Record<AuthProviderId, string> = {
-  kakao: '카카오',
-  naver: '네이버',
-  apple: 'Apple',
-  google: 'Google',
-  guest: '게스트',
-};
-
-function randomSuffix() {
-  return String(1000 + Math.floor(Math.random() * 9000));
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
+
+  const persist = useCallback(async (session: StoredAuth | null) => {
+    if (!session) {
+      await AsyncStorage.removeItem(STORAGE_KEY);
+      setAuthToken(null);
+      setUser(null);
+      return;
+    }
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    setAuthToken(session.token);
+    setUser(session.user);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (cancelled) {
+        if (!raw) {
           return;
         }
-        if (raw) {
-          const parsed = JSON.parse(raw) as AuthUser;
-          if (parsed?.nickname && parsed?.provider) {
-            setUser(parsed);
+        const parsed = JSON.parse(raw) as StoredAuth;
+        if (!parsed?.token || !parsed?.user?.nickname) {
+          return;
+        }
+        setAuthToken(parsed.token);
+        try {
+          const me = await fetchMe();
+          if (!cancelled) {
+            const next = { token: parsed.token, user: me };
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+            setUser(me);
+          }
+        } catch {
+          if (!cancelled) {
+            setUser(parsed.user);
           }
         }
       } catch {
@@ -69,28 +84,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signIn = useCallback(async (provider: AuthProviderId) => {
-    /**
-     * 실제 서비스 연동 시:
-     * - 카카오: @react-native-seoul/kakao-login + 네이티브 키
-     * - 네이버: 네이버 로그인 SDK
-     * - Apple: @invertase/react-native-apple-authentication
-     * - Google: @react-native-google-signin/google-signin
-     * 여기서는 UI·플로우 검증용으로 닉네임만 저장합니다.
-     */
-    const nickname =
-      provider === 'guest'
-        ? `게스트${randomSuffix()}`
-        : `${PROVIDER_PREFIX[provider]}${randomSuffix()}`;
-    const next: AuthUser = { provider, nickname };
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setUser(next);
-  }, []);
+  const signIn = useCallback(
+    async (provider: AuthProviderId) => {
+      const credential = await obtainSocialCredential(provider);
+      const session = await socialSignIn(credential);
+      await persist(session);
+    },
+    [persist],
+  );
 
   const signOut = useCallback(async () => {
-    await AsyncStorage.removeItem(STORAGE_KEY);
-    setUser(null);
-  }, []);
+    const provider = user?.provider;
+    try {
+      await logoutApi();
+    } catch {
+      /* 서버 세션 없어도 로컬은 지움 */
+    }
+    if (provider) {
+      await signOutSocialSdks(provider);
+    }
+    await persist(null);
+  }, [persist, user?.provider]);
 
   const value = useMemo(
     () => ({ ready, user, signIn, signOut }),
@@ -108,4 +122,17 @@ export function useAuth() {
     throw new Error('useAuth must be inside AuthProvider');
   }
   return ctx;
+}
+
+export function getAuthErrorMessage(error: unknown) {
+  if (error instanceof SocialAuthError) {
+    if (error.code === 'CANCELLED') {
+      return error.message;
+    }
+    return error.message;
+  }
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  return '로그인에 실패했어요. yarn server 가 실행 중인지 확인해 주세요.';
 }

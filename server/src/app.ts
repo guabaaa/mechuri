@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { errorHandler } from './middleware/errorHandler';
+import authRouter from './routes/auth';
 import fortuneRouter from './routes/fortune';
 import menusRouter from './routes/menus';
 import mbtiRouter from './routes/mbti';
@@ -18,6 +19,7 @@ export function createApp() {
     res.json({ ok: true, dateLabel: formatTodayLabel() });
   });
 
+  app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/fortune', fortuneRouter);
   app.use('/api/v1/menus', menusRouter);
   app.use('/api/v1/mbti', mbtiRouter);

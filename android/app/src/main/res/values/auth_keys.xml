@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- auth.local.ts 의 kakao.nativeAppKey 와 동일하게 -->
+    <string name="kakao_app_key" translatable="false">438d85132fe878dc3fa822535a2d772b</string>
+</resources>

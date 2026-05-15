@@ -1,105 +1,151 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
+  Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AuthProviderId, useAuth } from '../context/AuthContext';
-import { useAppTheme } from '../theme';
+import { mechuriLogo } from '../assets';
+import { QuailMascot } from '../components';
+import type { AuthProviderId } from '../api/types';
+import { getAuthErrorMessage, useAuth } from '../context/AuthContext';
+import { colors, homeTileTints } from '../theme';
+import { fonts } from '../theme/typography';
 
 type SocialRow = {
   id: AuthProviderId;
   label: string;
-  sub?: string;
-  bg: keyof Pick<
-    ReturnType<typeof useAppTheme>,
-    'kakao' | 'naver' | 'apple' | 'googleBg'
-  >;
-  fg: 'dark' | 'light';
+  emoji: string;
+  bg: string;
+  fg: string;
+  border?: string;
 };
 
-const ROWS: SocialRow[] = [
-  { id: 'kakao', label: '카카오로 시작하기', bg: 'kakao', fg: 'dark' },
-  { id: 'naver', label: '네이버로 시작하기', bg: 'naver', fg: 'light' },
-  { id: 'apple', label: 'Apple로 계속하기', bg: 'apple', fg: 'light' },
+const ALL_ROWS: SocialRow[] = [
+  {
+    id: 'kakao',
+    label: '카카오로 시작하기',
+    emoji: '💬',
+    bg: '#FEE500',
+    fg: '#191919',
+  },
+  {
+    id: 'naver',
+    label: '네이버로 시작하기',
+    emoji: 'N',
+    bg: '#03C75A',
+    fg: '#FFFFFF',
+  },
+  {
+    id: 'apple',
+    label: 'Apple로 계속하기',
+    emoji: '',
+    bg: '#000000',
+    fg: '#FFFFFF',
+  },
   {
     id: 'google',
     label: 'Google로 계속하기',
-    bg: 'googleBg',
-    fg: 'dark',
+    emoji: 'G',
+    bg: '#FFFFFF',
+    fg: '#1F1F1F',
+    border: colors.tileBorder,
   },
 ];
 
 export default function LoginScreen() {
-  const theme = useAppTheme();
   const { signIn } = useAuth();
   const [busy, setBusy] = useState<AuthProviderId | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const rows = useMemo(
+    () =>
+      ALL_ROWS.filter((row) => row.id !== 'apple' || Platform.OS === 'ios'),
+    [],
+  );
 
   const onSocial = async (id: AuthProviderId) => {
     setBusy(id);
+    setError(null);
     try {
       await signIn(id);
+    } catch (e) {
+      setError(getAuthErrorMessage(e));
     } finally {
       setBusy(null);
     }
   };
 
   return (
-    <SafeAreaView
-      style={[styles.safe, { backgroundColor: theme.bg }]}
-      edges={['top', 'bottom', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled">
-        <Text style={[styles.brand, { color: theme.sub }]}>메뉴추천리스트</Text>
-        <Text style={[styles.logo, { color: theme.text }]}>메추리</Text>
-        <Text style={[styles.tagline, { color: theme.sub }]}>
-          오늘 뭐 먹지? 메추리가 골라줄게요
-        </Text>
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.brandBlock}>
+          <Image
+            source={mechuriLogo}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="메추리"
+          />
+          <QuailMascot size="md" />
+          <Text style={styles.tagline}>오늘 뭐 먹지? 메추리가 골라줄게요</Text>
+        </View>
 
         <View style={styles.block}>
-          <Text style={[styles.blockTitle, { color: theme.text }]}>
-            간편 로그인
+          <Text style={styles.blockTitle}>간편 로그인</Text>
+          <Text style={styles.note}>
+            카카오·네이버·Apple·Google 계정으로 빠르게 시작해요.
           </Text>
-          <Text style={[styles.note, { color: theme.sub }]}>
-            아래 버튼은 UI·저장 플로우용이에요. 실제 서비스에서는 각 SDK로
-            토큰·프로필을 받아오면 됩니다.
-          </Text>
-          {ROWS.map((row) => {
-            const bg = theme[row.bg];
-            const fg =
-              row.fg === 'dark' ? theme.googleText : row.id === 'apple' ? '#fff' : '#fff';
-            return (
-              <Pressable
-                key={row.id}
-                disabled={busy != null}
-                onPress={() => onSocial(row.id)}
-                style={({ pressed }) => [
-                  styles.social,
-                  { backgroundColor: bg },
-                  pressed && styles.pressed,
-                ]}>
-                {busy === row.id ? (
-                  <ActivityIndicator color={fg} />
-                ) : (
-                  <Text style={[styles.socialLabel, { color: fg }]}>
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          {rows.map((row) => (
+            <Pressable
+              key={row.id}
+              disabled={busy != null}
+              onPress={() => onSocial(row.id)}
+              style={({ pressed }) => [
+                styles.social,
+                {
+                  backgroundColor: row.bg,
+                  borderWidth: row.border ? 2 : 0,
+                  borderColor: row.border ?? 'transparent',
+                },
+                pressed && styles.pressed,
+              ]}>
+              {busy === row.id ? (
+                <ActivityIndicator color={row.fg} />
+              ) : (
+                <>
+                  {row.emoji ? (
+                    <Text
+                      style={[
+                        styles.socialEmoji,
+                        row.id === 'naver' && styles.naverEmoji,
+                        { color: row.fg },
+                      ]}>
+                      {row.emoji}
+                    </Text>
+                  ) : null}
+                  <Text style={[styles.socialLabel, { color: row.fg }]}>
                     {row.label}
                   </Text>
-                )}
-              </Pressable>
-            );
-          })}
+                </>
+              )}
+            </Pressable>
+          ))}
 
-          <View style={[styles.divider, { borderColor: theme.border }]}>
-            <View style={[styles.divLine, { backgroundColor: theme.border }]} />
-            <Text style={[styles.divText, { color: theme.sub }]}>또는</Text>
-            <View style={[styles.divLine, { backgroundColor: theme.border }]} />
+          <View style={styles.divider}>
+            <View style={styles.divLine} />
+            <Text style={styles.divText}>또는</Text>
+            <View style={styles.divLine} />
           </View>
 
           <Pressable
@@ -107,15 +153,12 @@ export default function LoginScreen() {
             onPress={() => onSocial('guest')}
             style={({ pressed }) => [
               styles.guest,
-              { borderColor: theme.accent },
-              pressed && { opacity: 0.88 },
+              pressed && styles.pressed,
             ]}>
             {busy === 'guest' ? (
-              <ActivityIndicator color={theme.accent} />
+              <ActivityIndicator color={colors.brown} />
             ) : (
-              <Text style={[styles.guestLabel, { color: theme.accent }]}>
-                둘러보기 (게스트)
-              </Text>
+              <Text style={styles.guestLabel}>둘러보기 (게스트)</Text>
             )}
           </Pressable>
         </View>
@@ -125,40 +168,102 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
+  safe: { flex: 1, backgroundColor: colors.cream },
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 20,
     paddingBottom: 40,
     justifyContent: 'center',
   },
-  brand: { fontSize: 13, letterSpacing: 1.2, marginBottom: 6 },
-  logo: { fontSize: 40, fontWeight: '900', marginBottom: 12 },
-  tagline: { fontSize: 15, lineHeight: 22, marginBottom: 32 },
-  block: { marginTop: 8 },
-  blockTitle: { fontSize: 17, fontWeight: '800', marginBottom: 8 },
-  note: { fontSize: 12, lineHeight: 18, marginBottom: 16 },
-  social: {
-    borderRadius: 12,
-    paddingVertical: 16,
+  brandBlock: {
     alignItems: 'center',
+    marginBottom: 28,
+  },
+  logo: {
+    width: 180,
+    height: 64,
+    marginBottom: 8,
+  },
+  tagline: {
+    fontFamily: fonts.display,
+    fontSize: 15,
+    color: colors.taupe,
+    marginTop: 10,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  block: { marginTop: 4 },
+  blockTitle: {
+    fontFamily: fonts.display,
+    fontSize: 18,
+    color: colors.brown,
+    marginBottom: 6,
+  },
+  note: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.taupe,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  error: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.red,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  social: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderRadius: 14,
+    paddingVertical: 15,
     marginBottom: 10,
   },
-  socialLabel: { fontSize: 16, fontWeight: '700' },
-  pressed: { opacity: 0.92 },
+  socialEmoji: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  naverEmoji: {
+    fontFamily: fonts.display,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  socialLabel: {
+    fontFamily: fonts.display,
+    fontSize: 16,
+  },
+  pressed: { opacity: 0.9 },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 18,
   },
-  divLine: { flex: 1, height: 1 },
-  divText: { paddingHorizontal: 12, fontSize: 13 },
+  divLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.tileBorder,
+  },
+  divText: {
+    paddingHorizontal: 12,
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.taupe,
+  },
   guest: {
     borderWidth: 2,
-    borderRadius: 12,
+    borderColor: colors.tileBorder,
+    borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
+    backgroundColor: homeTileTints.recipe,
   },
-  guestLabel: { fontSize: 16, fontWeight: '700' },
+  guestLabel: {
+    fontFamily: fonts.display,
+    fontSize: 16,
+    color: colors.brown,
+  },
 });
