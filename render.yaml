@@ -1,0 +1,14 @@
+# Render Blueprint — API only (server/). Dashboard 설정과 동일하게 맞춤.
+services:
+  - type: web
+    name: mechuri-api
+    runtime: node
+    rootDir: server
+    plan: starter
+    buildCommand: yarn install && yarn build
+    startCommand: yarn start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUTH_SKIP_VERIFY
+        value: 'true'
