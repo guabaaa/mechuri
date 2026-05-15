@@ -20,4 +20,4 @@ const DEV_HOST =
 
 export const API_BASE_URL = __DEV__
   ? `http://${DEV_HOST}:3001`
-  : 'https://api.mechuri.app';
+  : 'https://mechuri.onrender.com';
