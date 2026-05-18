@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- auth_keys.xml 로 복사 후 auth.local.ts 와 동일한 네이티브 앱 키를 넣으세요 -->
+    <string name="kakao_app_key" translatable="false">YOUR_KAKAO_NATIVE_APP_KEY</string>
+    <string name="kakao_oauth_scheme" translatable="false">kakaoYOUR_KAKAO_NATIVE_APP_KEY</string>
+    <!-- 네이버: auth.local.ts 의 consumerKey/Secret 사용 (Android는 JS 초기화) -->
+    <!-- iOS URL Scheme: mechurinaver (Info.plist 와 동일) -->
+</resources>

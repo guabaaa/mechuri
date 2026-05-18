@@ -2,4 +2,6 @@
 <resources>
     <!-- auth.local.ts 의 kakao.nativeAppKey 와 동일하게 -->
     <string name="kakao_app_key" translatable="false">438d85132fe878dc3fa822535a2d772b</string>
+    <!-- OAuth redirect: kakao{NATIVE_APP_KEY}://oauth -->
+    <string name="kakao_oauth_scheme" translatable="false">kakao438d85132fe878dc3fa822535a2d772b</string>
 </resources>
