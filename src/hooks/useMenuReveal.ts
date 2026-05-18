@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react';
 import { ApiError } from '../api/client';
+import type { DeliveryCategory } from '../api/types';
 
 export type MenuRevealResult = {
   menu: string;
   message: string;
   situationTitle?: string;
   situationId?: string;
+  deliveryCategory?: DeliveryCategory;
 };
 
 type Phase = 'idle' | 'loading' | 'reveal';

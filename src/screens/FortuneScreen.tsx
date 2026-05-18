@@ -3,6 +3,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -12,11 +13,8 @@ import {
 import { ApiError } from '../api/client';
 import { fetchFortune } from '../api/fortuneApi';
 import type { FortuneResult } from '../api/types';
-import {
-  FeatureActionButton,
-  QuailMascot,
-  ScreenContainer,
-} from '../components';
+import { fortuneIcon, todayFortuneLogo } from '../assets';
+import { FeatureActionButton, ScreenContainer } from '../components';
 import type { HomeStackParamList } from '../navigation/types';
 import { colors, homeTileTints, shadows } from '../theme';
 import { fonts } from '../theme/typography';
@@ -87,8 +85,12 @@ export default function FortuneScreen({ navigation }: Props) {
         </Pressable>
 
         <View style={styles.hero}>
-          <QuailMascot size="md" />
-          <Text style={styles.head}>오늘의 운세</Text>
+          <Image
+            source={todayFortuneLogo}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="오늘의 운세"
+          />
           <Text style={styles.sub}>
             생일을 입력하면 오늘의 운세와{'\n'}행운의 점심 메뉴를 알려드려요
           </Text>
@@ -126,7 +128,7 @@ export default function FortuneScreen({ navigation }: Props) {
         ) : (
           <FeatureActionButton
             label="운세 보기"
-            icon="✨"
+            iconImage={fortuneIcon}
             tint={homeTileTints.fortune}
             loading={submitting}
             disabled={submitting}
@@ -190,7 +192,13 @@ export default function FortuneScreen({ navigation }: Props) {
                   ]}>
                   {menu.isPick ? (
                     <View style={styles.pickBadge}>
-                      <Text style={styles.pickBadgeText}>오늘의 픽 ✨</Text>
+                      <Image
+                        source={fortuneIcon}
+                        style={styles.pickBadgeIcon}
+                        resizeMode="contain"
+                        accessibilityElementsHidden
+                      />
+                      <Text style={styles.pickBadgeText}>오늘의 픽</Text>
                     </View>
                   ) : null}
                   <Text style={styles.menuEmoji}>{menu.emoji}</Text>
@@ -225,25 +233,24 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    paddingVertical: 8,
-    marginBottom: 20,
+    paddingVertical: 4,
+    marginBottom: 18,
   },
-  head: {
-    fontFamily: fonts.display,
-    fontSize: 24,
-    color: colors.brown,
-    marginTop: 10,
+  logo: {
+    width: 280,
+    height: 184,
+    marginBottom: 8,
   },
   sub: {
     fontFamily: fonts.body,
     fontSize: 14,
     color: colors.taupe,
-    marginTop: 8,
+    marginTop: 4,
     textAlign: 'center',
     lineHeight: 22,
   },
   dateBadge: {
-    marginTop: 12,
+    marginTop: 10,
     backgroundColor: colors.white,
     borderWidth: 2,
     borderColor: colors.tileBorder,
@@ -401,7 +408,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   pickBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
+    gap: 4,
     backgroundColor: colors.yellow,
     borderWidth: 2,
     borderColor: colors.tileBorder,
@@ -409,6 +419,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     marginBottom: 8,
+  },
+  pickBadgeIcon: {
+    width: 14,
+    height: 14,
   },
   pickBadgeText: {
     fontFamily: fonts.display,

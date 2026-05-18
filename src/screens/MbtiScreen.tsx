@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -10,9 +11,11 @@ import {
 import { ApiError } from '../api/client';
 import { fetchMbtiQuestions, fetchMbtiResult } from '../api/mbtiApi';
 import type { MbtiQuestionsResponse } from '../api/types';
+import { mebtiPageLogo } from '../assets';
 import { ScreenContainer } from '../components';
 import type { HomeStackParamList } from '../navigation/types';
-import { colors, shadows } from '../theme';
+import { colors, homeTileTints, shadows } from '../theme';
+import { fonts } from '../theme/typography';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'MbtiTest'>;
 
@@ -43,6 +46,7 @@ export default function MbtiScreen({ navigation }: Props) {
 
   const questions = weekData?.questions ?? [];
   const question = questions[step];
+  const progress = questions.length > 0 ? (step + 1) / questions.length : 0;
 
   const pick = useCallback(
     async (persona: string) => {
@@ -70,178 +74,251 @@ export default function MbtiScreen({ navigation }: Props) {
 
   if (loading) {
     return (
-      <ScreenContainer scroll={false}>
-        <ActivityIndicator size="large" color={colors.purple} style={styles.loader} />
-      </ScreenContainer>
+      <View style={styles.root}>
+        <ScreenContainer scroll={false}>
+          <ActivityIndicator
+            size="large"
+            color={colors.orange}
+            style={styles.loader}
+          />
+        </ScreenContainer>
+      </View>
     );
   }
 
   if (!weekData || !question) {
     return (
-      <ScreenContainer>
-        <Text style={styles.errorText}>{error ?? '질문을 불러올 수 없습니다.'}</Text>
-      </ScreenContainer>
+      <View style={styles.root}>
+        <ScreenContainer>
+          <Text style={styles.errorText}>
+            {error ?? '질문을 불러올 수 없습니다.'}
+          </Text>
+        </ScreenContainer>
+      </View>
     );
   }
 
   return (
-    <ScreenContainer>
-      <Pressable onPress={() => navigation.goBack()} style={styles.back}>
-        <Text style={styles.backText}>← 홈</Text>
-      </Pressable>
+    <View style={styles.root}>
+      <ScreenContainer contentStyle={styles.screen}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.back}>
+          <Text style={styles.backText}>← 홈</Text>
+        </Pressable>
 
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <View style={styles.badgeRow}>
-          <View style={styles.brandBadge}>
-            <Text style={styles.brandBadgeText}>🧠 메비티아이</Text>
-          </View>
-          <View style={styles.weekBadge}>
-            <Text style={styles.weekBadgeText}>{weekData.weekLabel}</Text>
-          </View>
-        </View>
-        <Text style={styles.setTitle}>{weekData.setTitle}</Text>
-        <Text style={styles.setDesc}>{weekData.setDescription}</Text>
-      </View>
-
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-      {/* 질문 카드 */}
-      <View style={[styles.card, shadows.card]}>
-        <View style={styles.progressRow}>
-          <View style={styles.progressBarTrack}>
-            <View
-              style={[
-                styles.progressBarFill,
-                { width: `${((step + 1) / questions.length) * 100}%` },
-              ]}
-            />
-          </View>
-          <Text style={styles.progressLabel}>
-            {step + 1} / {questions.length}
+        <View style={styles.hero}>
+          <Image
+            source={mebtiPageLogo}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="메비티아이"
+          />
+          <Text style={styles.sub}>
+            질문에 답하면 오늘의 음식 성향을{'\n'}메추리가 분석해 드려요
           </Text>
+          <View style={styles.badgeRow}>
+            <View style={styles.weekBadge}>
+              <Text style={styles.weekBadgeText}>{weekData.weekLabel}</Text>
+            </View>
+            <View style={styles.setBadge}>
+              <Text style={styles.setBadgeText} numberOfLines={1}>
+                {weekData.setTitle}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <Text style={styles.qTitle}>{question.title}</Text>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        {question.options.map((opt) => (
-          <Pressable
-            key={opt.id}
-            disabled={submitting}
-            onPress={() => pick(opt.persona)}
-            style={({ pressed }) => [
-              styles.opt,
-              pressed && styles.optPressed,
-              submitting && styles.optDisabled,
-            ]}>
-            {submitting ? (
-              <ActivityIndicator color={colors.brown} />
-            ) : (
-              <Text style={styles.optText}>{opt.label}</Text>
-            )}
-          </Pressable>
-        ))}
-      </View>
+        <View style={[styles.card, shadows.card]}>
+          <View style={styles.progressRow}>
+            <View style={styles.progressBarTrack}>
+              <View
+                style={[styles.progressBarFill, { width: `${progress * 100}%` }]}
+              />
+            </View>
+            <Text style={styles.progressLabel}>
+              {step + 1}/{questions.length}
+            </Text>
+          </View>
 
-      <Text style={styles.hint}>매주 새로운 테스트가 업데이트돼요</Text>
-    </ScreenContainer>
+          <Text style={styles.qKicker}>Q{step + 1}</Text>
+          <Text style={styles.qTitle}>{question.title}</Text>
+
+          {question.options.map((opt, i) => (
+            <Pressable
+              key={opt.id}
+              disabled={submitting}
+              onPress={() => pick(opt.persona)}
+              style={({ pressed }) => [
+                styles.opt,
+                i === question.options.length - 1 && styles.optLast,
+                pressed && styles.optPressed,
+                submitting && styles.optDisabled,
+              ]}>
+              {submitting ? (
+                <ActivityIndicator color={colors.brown} size="small" />
+              ) : (
+                <Text style={styles.optText}>{opt.label}</Text>
+              )}
+            </Pressable>
+          ))}
+        </View>
+
+        <Text style={styles.hint}>
+          매주 새로운 질문 세트가 바뀌어요 · 16가지 유형 중 하나
+        </Text>
+      </ScreenContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.cream },
+  screen: { paddingBottom: 36 },
   loader: { marginTop: 80 },
   back: { marginTop: 4, marginBottom: 8, alignSelf: 'flex-start' },
-  backText: { fontSize: 15, fontWeight: '700', color: colors.purple },
-  header: { marginBottom: 20 },
+  backText: {
+    fontFamily: fonts.body,
+    fontSize: 15,
+    color: colors.tileText,
+  },
+  hero: {
+    alignItems: 'center',
+    paddingVertical: 4,
+    marginBottom: 18,
+  },
+  logo: {
+    width: 220,
+    height: 144,
+    marginBottom: 6,
+  },
+  sub: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.taupe,
+    marginTop: 6,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
   badgeRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 10,
     flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 14,
+    paddingHorizontal: 8,
   },
-  brandBadge: {
-    backgroundColor: colors.purple,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  brandBadgeText: { fontSize: 13, fontWeight: '800', color: '#fff' },
   weekBadge: {
     backgroundColor: colors.yellow,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
     borderWidth: 2,
-    borderColor: colors.brown,
+    borderColor: colors.tileBorder,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  weekBadgeText: { fontSize: 13, fontWeight: '700', color: colors.brown },
-  setTitle: {
-    fontSize: 20,
-    fontWeight: '900',
+  weekBadgeText: {
+    fontFamily: fonts.display,
+    fontSize: 12,
     color: colors.brown,
-    marginBottom: 4,
-    lineHeight: 26,
   },
-  setDesc: { fontSize: 14, color: colors.taupe, lineHeight: 20 },
+  setBadge: {
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.tileBorder,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    maxWidth: '72%',
+  },
+  setBadgeText: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.tileText,
+  },
   card: {
     backgroundColor: colors.white,
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 2,
-    borderColor: colors.brown,
-    padding: 20,
-    marginBottom: 14,
+    borderColor: colors.tileBorder,
+    padding: 18,
+    marginBottom: 12,
   },
   progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   progressBarTrack: {
     flex: 1,
-    height: 8,
-    backgroundColor: '#EDE4D4',
-    borderRadius: 4,
+    height: 10,
+    backgroundColor: colors.cream,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.tileBorder,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: colors.purple,
-    borderRadius: 4,
+    backgroundColor: colors.yellow,
+    borderRadius: 5,
   },
   progressLabel: {
+    fontFamily: fonts.display,
     fontSize: 13,
-    fontWeight: '700',
     color: colors.taupe,
-    minWidth: 36,
+    minWidth: 32,
     textAlign: 'right',
   },
+  qKicker: {
+    fontFamily: fonts.display,
+    fontSize: 13,
+    color: colors.orange,
+    marginBottom: 6,
+  },
   qTitle: {
+    fontFamily: fonts.display,
     fontSize: 18,
-    fontWeight: '800',
     color: colors.brown,
     lineHeight: 26,
     marginBottom: 16,
   },
   opt: {
     borderWidth: 2,
-    borderColor: colors.brown,
+    borderColor: colors.tileBorder,
     borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 14,
     marginBottom: 10,
-    backgroundColor: colors.cream,
+    backgroundColor: homeTileTints.mbti,
     minHeight: 52,
     justifyContent: 'center',
   },
-  optPressed: { opacity: 0.85, backgroundColor: colors.yellow },
-  optDisabled: { opacity: 0.6 },
-  optText: { fontSize: 16, fontWeight: '600', color: colors.brown, lineHeight: 22 },
-  errorText: { fontSize: 14, color: colors.red, marginBottom: 12 },
+  optLast: { marginBottom: 0 },
+  optPressed: {
+    opacity: 0.9,
+    backgroundColor: colors.yellow,
+    borderColor: colors.orange,
+  },
+  optDisabled: { opacity: 0.55 },
+  optText: {
+    fontFamily: fonts.body,
+    fontSize: 15,
+    color: colors.brown,
+    lineHeight: 22,
+  },
+  errorText: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.red,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
   hint: {
+    fontFamily: fonts.body,
     fontSize: 13,
     color: colors.taupe,
     textAlign: 'center',
-    marginTop: 4,
+    lineHeight: 20,
   },
 });

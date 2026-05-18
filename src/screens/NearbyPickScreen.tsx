@@ -1,29 +1,43 @@
 import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { fetchNearbyDistricts, fetchNearbyPick } from '../api/nearbyApi';
-import type { NearbyDistrict, NearbyMood, NearbyPickResult } from '../api/types';
+import { fetchNearbyPick } from '../api/nearbyApi';
+import type { NearbyMood, NearbyPickResult } from '../api/types';
 import { ApiError } from '../api/client';
+import { nearbyIcon, nearbyPageLogo } from '../assets';
 import {
   FeatureActionButton,
-  QuailMascot,
+  NearbyLocationPanel,
   ScreenContainer,
 } from '../components';
+import { useNearbyLocation } from '../location/useNearbyLocation';
 import type { MainTabParamList } from '../navigation/types';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import {
-  loadRecentDistrictIds,
-  saveRecentDistrictId,
-} from '../storage/recentAreas';
 import { colors, homeTileTints, shadows } from '../theme';
 import { fonts } from '../theme/typography';
 import { menuEmoji } from '../utils/menuEmoji';
+
+function NearbyPageHero({ sub }: { sub: string }) {
+  return (
+    <View style={styles.hero}>
+      <Image
+        source={nearbyPageLogo}
+        style={styles.logo}
+        resizeMode="contain"
+        accessibilityLabel="근처에서 먹기"
+      />
+      <Text style={styles.sub}>{sub}</Text>
+    </View>
+  );
+}
 
 const WALK_OPTIONS = [5, 10, 15] as const;
 const MOODS: { id: NearbyMood; label: string; icon: string }[] = [
@@ -36,47 +50,20 @@ const MOODS: { id: NearbyMood; label: string; icon: string }[] = [
 export default function NearbyPickScreen() {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
   const showBack = navigation.canGoBack();
-  const [districts, setDistricts] = useState<NearbyDistrict[]>([]);
-  const [recentIds, setRecentIds] = useState<string[]>([]);
-  const [districtId, setDistrictId] = useState<string | null>(null);
+  const { status, coords, error: locError, refresh, openSettings } =
+    useNearbyLocation();
+
   const [radiusWalkMin, setRadiusWalkMin] = useState<5 | 10 | 15>(10);
   const [mood, setMood] = useState<NearbyMood | null>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<NearbyPickResult | null>(null);
   const [placesRevealed, setPlacesRevealed] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [list, recent] = await Promise.all([
-          fetchNearbyDistricts(),
-          loadRecentDistrictIds(),
-        ]);
-        setDistricts(list);
-        setRecentIds(recent);
-        const recentMatch = recent.find((id) =>
-          list.some((d) => d.id === id),
-        );
-        const initial = recentMatch ?? list[0]?.id ?? null;
-        setDistrictId(initial);
-      } catch (e) {
-        setError(
-          e instanceof ApiError
-            ? e.message
-            : '서버에 연결할 수 없어요. yarn server 를 실행해 주세요.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
   const runPick = useCallback(
     async (exclude?: string) => {
-      if (!districtId) {
-        setError('동네를 선택해 주세요.');
+      if (!coords) {
+        setError('위치를 먼저 불러와 주세요.');
         return;
       }
       setSubmitting(true);
@@ -84,18 +71,11 @@ export default function NearbyPickScreen() {
       setPlacesRevealed(false);
       try {
         const picked = await fetchNearbyPick({
-          districtId,
+          lat: coords.lat,
+          lng: coords.lng,
           radiusWalkMin,
           mood: mood ?? undefined,
           exclude,
-        });
-        await saveRecentDistrictId(districtId);
-        setRecentIds((prev) => {
-          const next = [
-            districtId,
-            ...prev.filter((id) => id !== districtId),
-          ].slice(0, 3);
-          return next;
         });
         setResult(picked);
       } catch (e) {
@@ -109,7 +89,7 @@ export default function NearbyPickScreen() {
         setSubmitting(false);
       }
     },
-    [districtId, mood, radiusWalkMin],
+    [coords, mood, radiusWalkMin],
   );
 
   const resetPick = useCallback(() => {
@@ -124,11 +104,13 @@ export default function NearbyPickScreen() {
     });
   };
 
-  const recentDistricts = recentIds
-    .map((id) => districts.find((d) => d.id === id))
-    .filter((d): d is NearbyDistrict => d != null);
+  const openPlace = (url?: string) => {
+    if (url) {
+      Linking.openURL(url);
+    }
+  };
 
-  if (loading) {
+  if (status === 'loading') {
     return (
       <ScreenContainer scroll={false}>
         <ActivityIndicator
@@ -136,6 +118,26 @@ export default function NearbyPickScreen() {
           color={colors.orange}
           style={styles.loader}
         />
+        <Text style={styles.loadingText}>현재 위치를 찾는 중...</Text>
+      </ScreenContainer>
+    );
+  }
+
+  if (status === 'denied' || status === 'unavailable' || !coords) {
+    return (
+      <ScreenContainer>
+        <NearbyPageHero sub={locError ?? '위치를 사용할 수 없어요.'} />
+        <FeatureActionButton
+          label="다시 시도"
+          iconImage={nearbyIcon}
+          tint={homeTileTints.nearby}
+          onPress={refresh}
+        />
+        {status === 'denied' ? (
+          <Pressable onPress={openSettings} style={styles.settingsLink}>
+            <Text style={styles.settingsText}>설정 열기</Text>
+          </Pressable>
+        ) : null}
       </ScreenContainer>
     );
   }
@@ -148,64 +150,17 @@ export default function NearbyPickScreen() {
         </Pressable>
       ) : null}
 
-      <View style={styles.hero}>
-        <QuailMascot size="md" />
-        <Text style={styles.head}>근처에서 먹기</Text>
-        <Text style={styles.sub}>
-          동네와 도보 거리를 고르면{'\n'}메추리가 메뉴와 가게를 찾아줘요
-        </Text>
-      </View>
+      <NearbyPageHero sub={'내 위치 기준으로\n가까운 음식점을 찾아드려요'} />
+
+      <NearbyLocationPanel
+        userLat={coords.lat}
+        userLng={coords.lng}
+        places={result?.places}
+        height={result ? 200 : 240}
+      />
 
       {!result ? (
         <>
-          {recentDistricts.length > 0 ? (
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>최근 동네</Text>
-              <View style={styles.chipRow}>
-                {recentDistricts.map((d) => (
-                  <Pressable
-                    key={`recent-${d.id}`}
-                    onPress={() => setDistrictId(d.id)}
-                    style={[
-                      styles.chip,
-                      districtId === d.id && styles.chipActive,
-                    ]}>
-                    <Text
-                      style={[
-                        styles.chipText,
-                        districtId === d.id && styles.chipTextActive,
-                      ]}>
-                      {d.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          ) : null}
-
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>동네 선택</Text>
-            <View style={styles.chipRow}>
-              {districts.map((d) => (
-                <Pressable
-                  key={d.id}
-                  onPress={() => setDistrictId(d.id)}
-                  style={[
-                    styles.chip,
-                    districtId === d.id && styles.chipActive,
-                  ]}>
-                  <Text
-                    style={[
-                      styles.chipText,
-                      districtId === d.id && styles.chipTextActive,
-                    ]}>
-                    {d.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>도보 거리</Text>
             <View style={styles.chipRow}>
@@ -258,9 +213,13 @@ export default function NearbyPickScreen() {
             icon="📍"
             tint={homeTileTints.nearby}
             loading={submitting}
-            disabled={submitting || !districtId}
+            disabled={submitting}
             onPress={() => runPick()}
           />
+
+          <Pressable onPress={refresh} style={styles.refreshLink}>
+            <Text style={styles.refreshText}>위치 새로고침</Text>
+          </Pressable>
         </>
       ) : (
         <View style={styles.resultBlock}>
@@ -278,26 +237,37 @@ export default function NearbyPickScreen() {
             <Text style={styles.placesTitle}>🍽 가볼 만한 곳</Text>
             {placesRevealed ? (
               result.places.map((place) => (
-                <View key={place.name} style={styles.placeRow}>
+                <Pressable
+                  key={`${place.name}-${place.lat}`}
+                  onPress={() => openPlace(place.placeUrl)}
+                  style={styles.placeRow}>
                   <View style={styles.placeBody}>
                     <Text style={styles.placeName}>{place.name}</Text>
                     <Text style={styles.placeMeta}>
-                      {place.category} · 도보 {place.walkMin}분
+                      {place.category}
+                      {place.distanceM != null
+                        ? ` · ${place.distanceM}m`
+                        : ` · 도보 ${place.walkMin}분`}
                     </Text>
+                    {place.address ? (
+                      <Text style={styles.placeAddr}>{place.address}</Text>
+                    ) : null}
                   </View>
-                </View>
+                  {place.placeUrl ? (
+                    <Text style={styles.placeLink}>지도 ›</Text>
+                  ) : null}
+                </Pressable>
               ))
             ) : (
               <Pressable
                 onPress={() => setPlacesRevealed(true)}
                 style={styles.revealPlacesBtn}>
-                <Text style={styles.revealPlacesText}>
-                  가게 목록 보기 👀
-                </Text>
+                <Text style={styles.revealPlacesText}>가게 목록 보기 👀</Text>
               </Pressable>
             )}
             <Text style={styles.placesHint}>
-              참고용 추천이에요. 방문 전 지도에서 한번 더 확인해 주세요.
+              카카오맵 정보 기반 참고용이에요. 방문·주문 전 매장에서 다시 확인해
+              주세요.
             </Text>
           </View>
 
@@ -310,7 +280,6 @@ export default function NearbyPickScreen() {
               disabled={submitting}
               onPress={() => runPick(result.menu)}
             />
-
             <FeatureActionButton
               label="레시피 보기"
               icon="📖"
@@ -331,43 +300,37 @@ export default function NearbyPickScreen() {
 const styles = StyleSheet.create({
   screen: { paddingBottom: 36 },
   loader: { marginTop: 80 },
-  back: { marginTop: 4, marginBottom: 8, alignSelf: 'flex-start' },
-  backText: {
+  loadingText: {
     fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.tileText,
+    fontSize: 14,
+    color: colors.taupe,
+    textAlign: 'center',
+    marginTop: 12,
   },
-  hero: {
-    alignItems: 'center',
-    paddingVertical: 8,
-    marginBottom: 20,
-  },
-  head: {
-    fontFamily: fonts.display,
-    fontSize: 24,
-    color: colors.brown,
-    marginTop: 10,
+  back: { marginTop: 4, marginBottom: 8, alignSelf: 'flex-start' },
+  backText: { fontFamily: fonts.body, fontSize: 15, color: colors.tileText },
+  hero: { alignItems: 'center', paddingVertical: 4, marginBottom: 10 },
+  logo: {
+    width: 280,
+    height: 184,
+    marginBottom: 8,
   },
   sub: {
     fontFamily: fonts.body,
     fontSize: 14,
     color: colors.taupe,
-    marginTop: 8,
+    marginTop: 4,
     textAlign: 'center',
     lineHeight: 22,
   },
-  section: { marginBottom: 18 },
+  section: { marginBottom: 16, marginTop: 16 },
   sectionLabel: {
     fontFamily: fonts.display,
     fontSize: 14,
     color: colors.brown,
     marginBottom: 10,
   },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
     backgroundColor: colors.white,
     borderWidth: 2,
@@ -380,15 +343,8 @@ const styles = StyleSheet.create({
     backgroundColor: homeTileTints.nearby,
     borderColor: colors.orange,
   },
-  chipText: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.tileText,
-  },
-  chipTextActive: {
-    fontFamily: fonts.display,
-    color: colors.brown,
-  },
+  chipText: { fontFamily: fonts.body, fontSize: 13, color: colors.tileText },
+  chipTextActive: { fontFamily: fonts.display, color: colors.brown },
   error: {
     fontFamily: fonts.body,
     fontSize: 14,
@@ -396,7 +352,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
   },
-  resultBlock: { marginTop: 4 },
+  refreshLink: { alignSelf: 'center', marginTop: 12 },
+  refreshText: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.taupe,
+    textDecorationLine: 'underline',
+  },
+  settingsLink: { alignSelf: 'center', marginTop: 16 },
+  settingsText: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.orange,
+    textDecorationLine: 'underline',
+  },
+  resultBlock: { marginTop: 12 },
   resultCard: {
     backgroundColor: colors.white,
     borderRadius: 18,
@@ -413,11 +383,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   resultEmoji: { fontSize: 48, marginBottom: 6 },
-  resultLabel: {
-    fontFamily: fonts.body,
-    fontSize: 14,
-    color: colors.taupe,
-  },
+  resultLabel: { fontFamily: fonts.body, fontSize: 14, color: colors.taupe },
   resultMenu: {
     fontFamily: fonts.display,
     fontSize: 26,
@@ -448,10 +414,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
   },
-  actions: {
-    gap: 14,
-    marginBottom: 8,
-  },
+  actions: { gap: 14, marginBottom: 8 },
   placesTitle: {
     fontFamily: fonts.display,
     fontSize: 15,
@@ -459,21 +422,33 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   placeRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     borderTopWidth: 1,
     borderTopColor: colors.tileBorder,
     paddingVertical: 10,
+    gap: 8,
   },
   placeBody: { flex: 1 },
-  placeName: {
-    fontFamily: fonts.display,
-    fontSize: 15,
-    color: colors.brown,
-  },
+  placeName: { fontFamily: fonts.display, fontSize: 15, color: colors.brown },
   placeMeta: {
     fontFamily: fonts.body,
     fontSize: 12,
     color: colors.taupe,
     marginTop: 4,
+  },
+  placeAddr: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: colors.taupe,
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  placeLink: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.orange,
+    marginTop: 2,
   },
   revealPlacesBtn: {
     backgroundColor: homeTileTints.nearby,
@@ -483,11 +458,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  revealPlacesText: {
-    fontFamily: fonts.display,
-    fontSize: 15,
-    color: colors.brown,
-  },
+  revealPlacesText: { fontFamily: fonts.display, fontSize: 15, color: colors.brown },
   placesHint: {
     fontFamily: fonts.body,
     fontSize: 11,

@@ -10,8 +10,10 @@ import {
   getSetIndexForDate,
   getWeekLabel,
   MEVITIAI_SETS,
+  resolvePersona,
 } from './data/mevitiAI';
-import { getWeeklyQuestions } from './services/mbtiService';
+import { PERSONA_KEYS } from './data/personas';
+import { getWeeklyQuestions, resolveMbtiResult } from './services/mbtiService';
 
 describe('fortuneService', () => {
   it('parses birthday', () => {
@@ -65,5 +67,21 @@ describe('mevitiAI', () => {
     assert.ok(data.weekLabel.includes('주차'));
     assert.ok(data.setId.startsWith('set-'));
     assert.equal(data.questions.length, 6);
+  });
+
+  it('has 16 persona results in DB', () => {
+    assert.equal(PERSONA_KEYS.length, 16);
+  });
+
+  it('resolveMbtiResult returns extended fields', () => {
+    const r = resolveMbtiResult({ spicy: 3, hearty: 1 });
+    assert.equal(r.personaKey, 'spicy');
+    assert.ok(r.emoji);
+    assert.equal(r.traits.length, 3);
+    assert.ok(r.mechuriTip);
+  });
+
+  it('resolvePersona picks highest count', () => {
+    assert.equal(resolvePersona({ delivery: 2, quick: 1 }), 'delivery');
   });
 });

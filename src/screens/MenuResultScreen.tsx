@@ -9,8 +9,8 @@ import {
 import { diceIcon } from '../assets';
 import {
   FeatureActionButton,
+  MechuriPickHeader,
   MenuRevealOverlay,
-  QuailMascot,
   ScreenContainer,
 } from '../components';
 import { useMenuReveal } from '../hooks/useMenuReveal';
@@ -24,6 +24,7 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'MenuResult'>;
 function ribbonLabel(
   source: Props['route']['params']['source'],
   situationTitle?: string,
+  deliveryCategory?: Props['route']['params']['deliveryCategory'],
 ) {
   if (source === 'situation' && situationTitle) {
     return situationTitle;
@@ -32,14 +33,16 @@ function ribbonLabel(
     return '상황 맞춤 메뉴';
   }
   if (source === 'delivery') {
-    return '배달 브랜드 추천';
+    return deliveryCategory === 'dessert'
+      ? '배달 디저트·카페'
+      : '배달 식사 브랜드';
   }
   return '오늘의 추천 메뉴';
 }
 
 export default function MenuResultScreen({ navigation, route }: Props) {
   const params = route.params;
-  const { source, score, situationId } = params;
+  const { source, score, situationId, deliveryCategory } = params;
   const { phase, error, run, finishReveal, isBusy } = useMenuReveal();
 
   const [menu, setMenu] = useState(params.menu);
@@ -48,10 +51,15 @@ export default function MenuResultScreen({ navigation, route }: Props) {
 
   const usePickStyle =
     source === 'today' || source === 'situation' || source === 'delivery';
-  const label = ribbonLabel(source, situationTitle);
+  const label = ribbonLabel(source, situationTitle, deliveryCategory);
 
   const applyResult = useCallback(
-    (next: { menu: string; message: string; situationTitle?: string }) => {
+    (next: {
+      menu: string;
+      message: string;
+      situationTitle?: string;
+      deliveryCategory?: typeof deliveryCategory;
+    }) => {
       setMenu(next.menu);
       setMessage(next.message);
       if (next.situationTitle) {
@@ -62,6 +70,7 @@ export default function MenuResultScreen({ navigation, route }: Props) {
         menu: next.menu,
         message: next.message,
         situationTitle: next.situationTitle ?? params.situationTitle,
+        deliveryCategory: next.deliveryCategory ?? params.deliveryCategory,
       });
     },
     [navigation, params],
@@ -87,12 +96,15 @@ export default function MenuResultScreen({ navigation, route }: Props) {
         };
       }
       if (source === 'delivery') {
-        const result = await fetchDeliveryMenu(menu);
-        return result;
+        const result = await fetchDeliveryMenu(
+          menu,
+          deliveryCategory ?? params.deliveryCategory ?? 'meal',
+        );
+        return { ...result, deliveryCategory: result.category ?? deliveryCategory };
       }
       throw new Error('다시 뽑기를 지원하지 않는 결과예요.');
     });
-  }, [menu, params.situationId, run, situationId, source]);
+  }, [deliveryCategory, menu, params.deliveryCategory, params.situationId, run, situationId, source]);
 
   const onRevealDone = () => {
     finishReveal((result) => {
@@ -103,10 +115,7 @@ export default function MenuResultScreen({ navigation, route }: Props) {
   return (
     <View style={styles.root}>
       <ScreenContainer contentStyle={styles.screen}>
-        <View style={styles.header}>
-          <QuailMascot size="sm" />
-          <Text style={styles.headerBadge}>✨ 메추리의 한 마디</Text>
-        </View>
+        <MechuriPickHeader />
 
         <View style={styles.ribbon}>
           <Text style={styles.ribbonText}>{label}</Text>
@@ -166,12 +175,14 @@ export default function MenuResultScreen({ navigation, route }: Props) {
             onPress={redraw}
           />
 
-          <FeatureActionButton
-            label="레시피 보기"
-            icon="📖"
-            tint={homeTileTints.recipe}
-            onPress={() => navigation.navigate('Recipe', { menu })}
-          />
+          {source !== 'delivery' ? (
+            <FeatureActionButton
+              label="레시피 보기"
+              icon="📖"
+              tint={homeTileTints.recipe}
+              onPress={() => navigation.navigate('Recipe', { menu })}
+            />
+          ) : null}
         </View>
       </ScreenContainer>
 
@@ -188,16 +199,6 @@ export default function MenuResultScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   screen: { paddingTop: 4 },
-  header: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  headerBadge: {
-    fontFamily: fonts.display,
-    fontSize: 14,
-    color: colors.taupe,
-    marginTop: 4,
-  },
   ribbon: {
     alignSelf: 'center',
     backgroundColor: colors.yellow,

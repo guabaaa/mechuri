@@ -19,18 +19,7 @@ export function getWeeklyQuestions(date: Date = new Date()) {
   };
 }
 
-export function resolveMbtiResult(counts: Record<string, number>) {
-  const personaKey = resolvePersona(counts);
-  const result = PERSONA_RESULTS[personaKey];
-  return {
-    personaKey,
-    title: result.title,
-    body: result.body,
-    menus: result.menus,
-  };
-}
-
-export function getResultByPersona(personaKey: PersonaKey) {
+function toMbtiPayload(personaKey: PersonaKey) {
   const result = PERSONA_RESULTS[personaKey];
   if (!result) {
     throw new Error('INVALID_PERSONA');
@@ -38,7 +27,20 @@ export function getResultByPersona(personaKey: PersonaKey) {
   return {
     personaKey,
     title: result.title,
+    subtitle: result.subtitle,
+    emoji: result.emoji,
     body: result.body,
+    traits: result.traits,
     menus: result.menus,
+    mechuriTip: result.mechuriTip,
   };
+}
+
+export function resolveMbtiResult(counts: Record<string, number>) {
+  const personaKey = resolvePersona(counts);
+  return toMbtiPayload(personaKey);
+}
+
+export function getResultByPersona(personaKey: PersonaKey) {
+  return toMbtiPayload(personaKey);
 }

@@ -13,8 +13,10 @@ import { NotificationProvider } from './src/context/NotificationContext';
 import RootNavigator from './src/navigation/RootNavigator';
 function App() {
   useEffect(() => {
-    initAuthSdks().catch(() => {
-      /* 키 미설정 시 무시 */
+    initAuthSdks().catch((error) => {
+      if (__DEV__) {
+        console.warn('[Mechuri] auth SDK init failed:', error);
+      }
     });
   }, []);
 

@@ -1,8 +1,20 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import {
+  deliveryIcon,
   diceIcon,
-  mechuriLogo,
+  fortuneIcon,
+  ladderIcon,
+  mainLogo,
+  mebtiIcon,
+  nearbyIcon,
   notificationIcon,
   notificationIconRed,
 } from '../assets';
@@ -22,8 +34,7 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   const { width: screenWidth } = useWindowDimensions();
-  const tileWidth =
-    (screenWidth - homeScreenPadding * 2 - homeTileGap) / 2;
+  const tileWidth = (screenWidth - homeScreenPadding * 2 - homeTileGap) / 2;
   const { hasUnread, markRead } = useNotifications();
 
   const onNotificationPress = () => {
@@ -35,14 +46,19 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer contentStyle={styles.screen}>
-      <View style={styles.topBar}>
+      <View style={styles.header}>
+        <Image
+          source={mainLogo}
+          style={styles.textLogo}
+          resizeMode="contain"
+          accessibilityLabel="메추리"
+        />
         <Pressable
           onPress={onNotificationPress}
           style={styles.bell}
-          accessibilityLabel={
-            hasUnread ? '읽지 않은 알림 있음' : '알림'
-          }
-          hitSlop={12}>
+          accessibilityLabel={hasUnread ? '읽지 않은 알림 있음' : '알림'}
+          hitSlop={12}
+        >
           <Image
             source={hasUnread ? notificationIconRed : notificationIcon}
             style={styles.bellIcon}
@@ -51,18 +67,9 @@ export default function HomeScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      <View style={styles.brandBlock}>
-        <Image
-          source={mechuriLogo}
-          style={styles.logo}
-          resizeMode="contain"
-          accessibilityLabel="메추리"
-        />
-        <Text style={styles.tagline}>오늘 뭐 먹지? 메추리가 골라줄게요</Text>
-      </View>
-
       <View style={styles.hero}>
         <QuailMascot size="lg" />
+        <Text style={styles.tagline}>오늘 뭐 먹지? 메추리가 골라줄게요</Text>
       </View>
 
       <View style={[styles.grid, { gap: homeTileGap }]}>
@@ -77,7 +84,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={{ width: tileWidth, height: homeTileHeight }}>
             <FeatureTile
-              icon="🧠"
+              iconImage={mebtiIcon}
               label={'메비티아이\n테스트'}
               tint={homeTileTints.mbti}
               onPress={() => navigation.navigate('MbtiTest')}
@@ -87,7 +94,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={[styles.row, { gap: homeTileGap }]}>
           <View style={{ width: tileWidth, height: homeTileHeight }}>
             <FeatureTile
-              icon="🛵"
+              iconImage={deliveryIcon}
               label={'배달 메뉴\n뽑기'}
               tint={homeTileTints.delivery}
               onPress={() => navigation.navigate('DeliveryPick')}
@@ -95,7 +102,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={{ width: tileWidth, height: homeTileHeight }}>
             <FeatureTile
-              icon="📍"
+              iconImage={nearbyIcon}
               label={'근처에서\n먹기'}
               tint={homeTileTints.nearby}
               onPress={() => navigation.navigate('NearbyPick')}
@@ -105,7 +112,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={[styles.row, { gap: homeTileGap }]}>
           <View style={{ width: tileWidth, height: homeTileHeight }}>
             <FeatureTile
-              icon="🪜"
+              iconImage={ladderIcon}
               label={'메뉴\n사다리타기'}
               tint={homeTileTints.ladder}
               onPress={() => navigation.navigate('Ladder')}
@@ -113,7 +120,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <View style={{ width: tileWidth, height: homeTileHeight }}>
             <FeatureTile
-              icon="✨"
+              iconImage={fortuneIcon}
               label={'오늘의\n운세'}
               tint={homeTileTints.fortune}
               onPress={() => navigation.navigate('Fortune')}
@@ -127,49 +134,48 @@ export default function HomeScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: {
-    paddingTop: 4,
+    paddingTop: 0,
   },
-  topBar: {
+  header: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 4,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 0,
+    marginLeft: -10,
+    marginRight: -4,
+  },
+  textLogo: {
+    width: 130,
+    height: 80,
+    marginTop: -6,
+    marginLeft: -2,
   },
   bell: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
   bellIcon: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
   },
-  brandBlock: {
+  hero: {
     alignItems: 'center',
-    marginTop: 12,
-    paddingHorizontal: 48,
-  },
-  logo: {
-    width: 220,
-    height: 80,
+    justifyContent: 'center',
+    marginTop: 8,
+    marginBottom: 14,
   },
   tagline: {
     fontFamily: fonts.display,
     fontSize: 15,
     color: colors.taupe,
     marginTop: 10,
-    lineHeight: 24,
+    lineHeight: 22,
     textAlign: 'center',
   },
-  hero: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 28,
-    marginBottom: 28,
-    paddingTop: 8,
-  },
   grid: {
-    marginBottom: 8,
+    marginBottom: 4,
     width: '100%',
   },
   row: {

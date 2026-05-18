@@ -2,6 +2,7 @@ export { default as RecipeListScreen } from './RecipeListScreen';
 export { default as RecipeScreen } from './RecipeScreen';
 export { default as FortuneScreen } from './FortuneScreen';
 export { default as NearbyPickScreen } from './NearbyPickScreen';
+export { default as TermsConsentScreen } from './TermsConsentScreen';
 export { default as HomeScreen } from './HomeScreen';
 export { default as LoginScreen } from './LoginScreen';
 export { default as MbtiResultScreen } from './MbtiResultScreen';

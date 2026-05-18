@@ -10,9 +10,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { mechuriLogo } from '../assets';
-import { QuailMascot } from '../components';
+import { mainLogo } from '../assets';
 import type { AuthProviderId } from '../api/types';
+import { isAuthProviderConfigured } from '../config/auth';
+import { useAuthSdkReady } from '../auth/useAuthSdkReady';
 import { getAuthErrorMessage, useAuth } from '../context/AuthContext';
 import { colors, homeTileTints } from '../theme';
 import { fonts } from '../theme/typography';
@@ -60,14 +61,31 @@ const ALL_ROWS: SocialRow[] = [
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const { ready: sdkReady, error: sdkError } = useAuthSdkReady();
   const [busy, setBusy] = useState<AuthProviderId | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const rows = useMemo(
     () =>
-      ALL_ROWS.filter((row) => row.id !== 'apple' || Platform.OS === 'ios'),
+      ALL_ROWS.filter((row) => row.id !== 'apple' || Platform.OS === 'ios').filter(
+        (row) => isAuthProviderConfigured(row.id),
+      ),
     [],
   );
+
+  const loginNote = useMemo(() => {
+    const ids = new Set(rows.map((row) => row.id));
+    if (ids.has('kakao') && ids.has('naver')) {
+      return '카카오·네이버 계정으로 빠르게 시작해요.';
+    }
+    if (ids.has('kakao')) {
+      return '카카오 계정으로 빠르게 시작해요.';
+    }
+    if (ids.has('naver')) {
+      return '네이버 계정으로 빠르게 시작해요.';
+    }
+    return '소셜 계정으로 빠르게 시작해요.';
+  }, [rows]);
 
   const onSocial = async (id: AuthProviderId) => {
     setBusy(id);
@@ -89,27 +107,32 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}>
         <View style={styles.brandBlock}>
           <Image
-            source={mechuriLogo}
+            source={mainLogo}
             style={styles.logo}
             resizeMode="contain"
             accessibilityLabel="메추리"
           />
-          <QuailMascot size="md" />
           <Text style={styles.tagline}>오늘 뭐 먹지? 메추리가 골라줄게요</Text>
         </View>
 
         <View style={styles.block}>
           <Text style={styles.blockTitle}>간편 로그인</Text>
-          <Text style={styles.note}>
-            카카오·네이버·Apple·Google 계정으로 빠르게 시작해요.
-          </Text>
+          <Text style={styles.note}>{loginNote}</Text>
 
+          {sdkError ? <Text style={styles.error}>{sdkError}</Text> : null}
           {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          {!sdkReady ? (
+            <ActivityIndicator
+              color={colors.orange}
+              style={styles.sdkLoader}
+            />
+          ) : null}
 
           {rows.map((row) => (
             <Pressable
               key={row.id}
-              disabled={busy != null}
+              disabled={busy != null || !sdkReady}
               onPress={() => onSocial(row.id)}
               style={({ pressed }) => [
                 styles.social,
@@ -149,7 +172,7 @@ export default function LoginScreen() {
           </View>
 
           <Pressable
-            disabled={busy != null}
+            disabled={busy != null || !sdkReady}
             onPress={() => onSocial('guest')}
             style={({ pressed }) => [
               styles.guest,
@@ -181,15 +204,15 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   logo: {
-    width: 180,
-    height: 64,
+    width: 220,
+    height: 143,
     marginBottom: 8,
   },
   tagline: {
     fontFamily: fonts.display,
     fontSize: 15,
     color: colors.taupe,
-    marginTop: 10,
+    marginTop: 16,
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -214,6 +237,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
   },
+  sdkLoader: { marginVertical: 16 },
   social: {
     flexDirection: 'row',
     alignItems: 'center',

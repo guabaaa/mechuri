@@ -1,5 +1,11 @@
 export function isAuthSkipVerify() {
-  return process.env.AUTH_SKIP_VERIFY === 'true';
+  if (process.env.AUTH_SKIP_VERIFY === 'true') {
+    return true;
+  }
+  if (process.env.AUTH_SKIP_VERIFY === 'false') {
+    return false;
+  }
+  return process.env.NODE_ENV !== 'production';
 }
 
 export function getAuthEnv() {

@@ -21,16 +21,39 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
   const token = getAuthToken();
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers ?? {}),
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers ?? {}),
+      },
+    });
+  } catch {
+    throw new ApiError(
+      'NETWORK',
+      __DEV__
+        ? `서버에 연결할 수 없어요. yarn server 실행 및 API(${API_BASE_URL})를 확인해 주세요.`
+        : '서버에 연결할 수 없어요. 네트워크를 확인해 주세요.',
+      0,
+    );
+  }
 
-  const json = (await res.json()) as ApiResponse<T> | ApiErrorBody;
+  let json: ApiResponse<T> | ApiErrorBody;
+  try {
+    const text = await res.text();
+    json = text
+      ? (JSON.parse(text) as ApiResponse<T> | ApiErrorBody)
+      : ({ error: { code: 'EMPTY', message: '응답이 비어 있어요.' } } as ApiErrorBody);
+  } catch {
+    throw new ApiError(
+      'PARSE_ERROR',
+      '서버 응답을 읽지 못했어요.',
+      res.status,
+    );
+  }
 
   if (!res.ok) {
     const err = json as ApiErrorBody;

@@ -137,9 +137,13 @@ export async function verifySocialCredential(input: {
 
   if (getAuthEnv().skipVerify) {
     const suffix = String(1000 + Math.floor(Math.random() * 9000));
+    const stableKey = accessToken ?? idToken;
+    const providerUserId = stableKey
+      ? `${provider}_${stableKey.slice(0, 48)}`
+      : `${provider}_dev_${suffix}`;
     return {
       provider,
-      providerUserId: `${provider}_dev_${suffix}`,
+      providerUserId,
       nickname: `${provider}${suffix}`,
     };
   }

@@ -33,16 +33,20 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
+android/keystore.properties
 .kotlin/
 
 # Local API override (real device)
 src/config/api.local.ts
 src/config/auth.local.ts
+src/config/maps.local.ts
+server/.env
 
 # node.js
 #
 node_modules/
 server/dist/
+server/.env
 npm-debug.log
 yarn-error.log
 

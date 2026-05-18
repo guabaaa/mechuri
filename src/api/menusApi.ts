@@ -1,5 +1,6 @@
 import { apiRequest } from './client';
 import type {
+  DeliveryCategory,
   MenuPickResult,
   MenuPoolResult,
   SituationPickResult,
@@ -10,10 +11,13 @@ export function fetchMenuPool() {
   return apiRequest<MenuPoolResult>('/api/v1/menus/pool');
 }
 
-export function fetchDeliveryMenu(exclude?: string) {
+export function fetchDeliveryMenu(
+  exclude?: string,
+  category: DeliveryCategory = 'meal',
+) {
   return apiRequest<MenuPickResult>('/api/v1/menus/delivery', {
     method: 'POST',
-    body: JSON.stringify({ exclude }),
+    body: JSON.stringify({ exclude, category }),
   });
 }
 

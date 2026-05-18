@@ -1,10 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { fetchDeliveryMenu } from '../api/menusApi';
+import type { DeliveryCategory } from '../api/types';
+import { baedalPageLogo } from '../assets';
 import {
   FeatureActionButton,
   MenuRevealOverlay,
-  QuailMascot,
   ScreenContainer,
 } from '../components';
 import { useMenuReveal } from '../hooks/useMenuReveal';
@@ -16,23 +18,33 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'DeliveryPick'>;
 
 export default function DeliveryPickScreen({ navigation }: Props) {
   const { phase, error, run, finishReveal, isBusy } = useMenuReveal();
+  const [category, setCategory] = useState<DeliveryCategory | null>(null);
 
-  const pickDelivery = async () => {
+  const pickDelivery = async (nextCategory: DeliveryCategory) => {
+    setCategory(nextCategory);
     await run(async () => {
-      const { menu, message } = await fetchDeliveryMenu();
-      return { menu, message };
+      const { menu, message } = await fetchDeliveryMenu(undefined, nextCategory);
+      return { menu, message, deliveryCategory: nextCategory };
     });
   };
 
   const onRevealDone = () => {
-    finishReveal(({ menu, message }) => {
+    finishReveal(({ menu, message, deliveryCategory }) => {
       navigation.replace('MenuResult', {
         menu,
         message,
         source: 'delivery',
+        deliveryCategory: deliveryCategory ?? category ?? 'meal',
       });
     });
   };
+
+  const revealTitle =
+    category === 'dessert'
+      ? '디저트·카페 고르는 중...'
+      : category === 'meal'
+        ? '식사 브랜드 고르는 중...'
+        : '배달 메뉴 고르는 중...';
 
   return (
     <View style={styles.root}>
@@ -42,10 +54,14 @@ export default function DeliveryPickScreen({ navigation }: Props) {
         </Pressable>
 
         <View style={styles.hero}>
-          <QuailMascot size="md" />
-          <Text style={styles.head}>배달 메뉴 뽑기</Text>
+          <Image
+            source={baedalPageLogo}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="배달 뽑기"
+          />
           <Text style={styles.sub}>
-            치킨·피자·카페까지,{'\n'}배달 브랜드를 골라드려요.
+            식사와 디저트·카페 중{'\n'}먼저 골라 주세요.
           </Text>
         </View>
 
@@ -55,21 +71,28 @@ export default function DeliveryPickScreen({ navigation }: Props) {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <FeatureActionButton
-          label="배달 브랜드 뽑기"
-          icon="🛵"
-          tint={homeTileTints.delivery}
-          loading={phase === 'loading'}
-          disabled={isBusy}
-          onPress={pickDelivery}
-        />
+        <View style={styles.actions}>
+          <FeatureActionButton
+            label="식사류 뽑기"
+            icon="🍗"
+            tint={homeTileTints.menu}
+            loading={phase === 'loading' && category === 'meal'}
+            disabled={isBusy}
+            onPress={() => pickDelivery('meal')}
+          />
+          <FeatureActionButton
+            label="디저트·카페 뽑기"
+            icon="🧋"
+            tint={homeTileTints.delivery}
+            loading={phase === 'loading' && category === 'dessert'}
+            disabled={isBusy}
+            onPress={() => pickDelivery('dessert')}
+          />
+        </View>
       </ScreenContainer>
 
       {phase === 'reveal' ? (
-        <MenuRevealOverlay
-          onComplete={onRevealDone}
-          title="배달 메뉴 고르는 중..."
-        />
+        <MenuRevealOverlay onComplete={onRevealDone} title={revealTitle} />
       ) : null}
     </View>
   );
@@ -86,19 +109,18 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     paddingVertical: 8,
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  head: {
-    fontFamily: fonts.display,
-    fontSize: 24,
-    color: colors.brown,
-    marginTop: 10,
+  logo: {
+    width: 280,
+    height: 184,
+    marginBottom: 8,
   },
   sub: {
     fontFamily: fonts.body,
     fontSize: 14,
     color: colors.taupe,
-    marginTop: 8,
+    marginTop: 6,
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -111,26 +133,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 8,
   },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 24,
-    paddingHorizontal: 8,
-  },
-  tag: {
-    backgroundColor: colors.white,
-    borderWidth: 1.5,
-    borderColor: colors.tileBorder,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  tagText: {
-    fontFamily: fonts.body,
-    fontSize: 12,
-    color: colors.tileText,
+  actions: {
+    gap: 14,
   },
   error: {
     fontFamily: fonts.body,

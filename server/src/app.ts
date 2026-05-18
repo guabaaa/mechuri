@@ -12,7 +12,11 @@ import { formatTodayLabel } from './services/fortuneService';
 export function createApp() {
   const app = express();
 
-  app.use(cors());
+  app.use(
+    cors({
+      exposedHeaders: ['X-Mechuri-Map-Source'],
+    }),
+  );
   app.use(express.json());
 
   app.get('/health', (_req, res) => {

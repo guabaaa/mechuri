@@ -39,12 +39,20 @@ router.post('/situation', (req, res, next) => {
 
 router.post('/delivery', (req, res, next) => {
   try {
-    const schema = z.object({ exclude: z.string().optional() });
+    const schema = z.object({
+      exclude: z.string().optional(),
+      category: z.enum(['meal', 'dessert']).optional(),
+    });
     const parsed = schema.safeParse(req.body ?? {});
     if (!parsed.success) {
       throw new ApiError(400, 'VALIDATION_ERROR', '요청 형식이 올바르지 않습니다.');
     }
-    res.json({ data: pickDeliveryMenu(parsed.data.exclude) });
+    res.json({
+      data: pickDeliveryMenu(
+        parsed.data.exclude,
+        parsed.data.category ?? 'meal',
+      ),
+    });
   } catch (e) {
     next(e);
   }

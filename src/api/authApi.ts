@@ -9,8 +9,17 @@ export function socialSignIn(credential: SocialCredential) {
   });
 }
 
+export { submitConsents } from './consentApi';
+
 export function fetchMe() {
   return apiRequest<AuthUser>('/api/v1/auth/me');
+}
+
+export function updateProfile(input: { nickname: string }) {
+  return apiRequest<AuthUser>('/api/v1/auth/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
 }
 
 export function logout() {

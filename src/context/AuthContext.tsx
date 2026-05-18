@@ -7,9 +7,16 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { fetchMe, logout as logoutApi, socialSignIn } from '../api/authApi';
+import {
+  fetchMe,
+  logout as logoutApi,
+  socialSignIn,
+  submitConsents as submitConsentsApi,
+  updateProfile as updateProfileApi,
+} from '../api/authApi';
 import { ApiError } from '../api/client';
 import { setAuthToken } from '../api/authToken';
+import { API_BASE_URL } from '../config/api';
 import { obtainSocialCredential, signOutSocialSdks } from '../auth/socialAuth';
 import { SocialAuthError } from '../auth/SocialAuthError';
 import type { AuthProviderId, AuthUser } from '../api/types';
@@ -25,6 +32,8 @@ type AuthContextValue = {
   ready: boolean;
   user: AuthUser | null;
   signIn: (provider: AuthProviderId) => Promise<void>;
+  submitConsents: () => Promise<void>;
+  updateNickname: (nickname: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -93,6 +102,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persist],
   );
 
+  const submitConsents = useCallback(async () => {
+    const me = await submitConsentsApi();
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as StoredAuth;
+      await persist({ token: parsed.token, user: me });
+    } else {
+      setUser(me);
+    }
+  }, [persist]);
+
+  const updateNickname = useCallback(
+    async (nickname: string) => {
+      const me = await updateProfileApi({ nickname });
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as StoredAuth;
+        await persist({ token: parsed.token, user: me });
+      } else {
+        setUser(me);
+      }
+    },
+    [persist],
+  );
+
   const signOut = useCallback(async () => {
     const provider = user?.provider;
     try {
@@ -107,8 +141,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [persist, user?.provider]);
 
   const value = useMemo(
-    () => ({ ready, user, signIn, signOut }),
-    [ready, user, signIn, signOut],
+    () => ({ ready, user, signIn, submitConsents, updateNickname, signOut }),
+    [ready, user, signIn, submitConsents, updateNickname, signOut],
   );
 
   return (
@@ -132,7 +166,15 @@ export function getAuthErrorMessage(error: unknown) {
     return error.message;
   }
   if (error instanceof ApiError) {
+    if (error.code === 'INVALID_TOKEN' && error.message.includes('카카오')) {
+      return `${error.message} (개발: yarn server 재시작, 카카오 콘솔 번들 ID com.mechuri 확인)`;
+    }
     return error.message;
   }
-  return '로그인에 실패했어요. yarn server 가 실행 중인지 확인해 주세요.';
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return __DEV__
+    ? `로그인에 실패했어요. yarn server 및 API(${API_BASE_URL})를 확인해 주세요.`
+    : '로그인에 실패했어요. 잠시 후 다시 시도해 주세요.';
 }

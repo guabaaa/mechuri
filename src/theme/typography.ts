@@ -1,11 +1,8 @@
 import { Platform } from 'react-native';
 
 /**
- * 커스텀 폰트 (src/assets/fonts → link-fonts.sh로 iOS/Android에 복사)
- * - Jua: 제목·로고
- * - Gowun Dodum: 본문·설명
- *
- * iOS/Android에서 fontFamily 이름이 다릅니다. 적용 후 `yarn ios`로 재빌드하세요.
+ * display: Jua만 번들에 포함 (~2MB 절감을 위해 본문은 시스템 폰트)
+ * link-fonts.sh → Jua-Regular.ttf 만 복사
  */
 export const fonts = {
   display: Platform.select({
@@ -14,8 +11,8 @@ export const fonts = {
     default: 'Jua-Regular',
   })!,
   body: Platform.select({
-    ios: 'GowunDodum',
-    android: 'GowunDodum-Regular',
-    default: 'GowunDodum-Regular',
+    ios: 'System',
+    android: 'sans-serif',
+    default: 'sans-serif',
   })!,
 } as const;

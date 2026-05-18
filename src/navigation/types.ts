@@ -1,5 +1,5 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
-import type { MbtiResult } from '../api/types';
+import type { DeliveryCategory, MbtiResult } from '../api/types';
 
 export type HomeStackParamList = {
   Home: undefined;
@@ -11,6 +11,7 @@ export type HomeStackParamList = {
     message: string;
     score?: number;
     source: 'today' | 'situation' | 'delivery' | 'fortune';
+    deliveryCategory?: DeliveryCategory;
     situationId?: string;
     situationTitle?: string;
   };

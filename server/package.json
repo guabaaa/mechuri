@@ -9,7 +9,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "build": "tsc",
-    "test": "tsx --test src/fortune.test.ts src/nearby.test.ts src/recipes.test.ts src/auth.test.ts"
+    "test": "tsx --test src/fortune.test.ts src/nearby.test.ts src/recipes.test.ts src/auth.test.ts src/consent.test.ts src/map.test.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -22,10 +22,13 @@ export type FortuneResult = {
   topPick: string;
 };
 
+export type DeliveryCategory = 'meal' | 'dessert';
+
 export type MenuPickResult = {
   menu: string;
   message: string;
   kind?: 'brand' | 'menu';
+  category?: DeliveryCategory;
 };
 
 export type AuthProviderId = 'kakao' | 'naver' | 'apple' | 'google' | 'guest';
@@ -34,6 +37,8 @@ export type AuthUser = {
   id: string;
   provider: AuthProviderId;
   nickname: string;
+  joinedAt?: string;
+  hasConsents: boolean;
 };
 
 export type AuthSession = {
@@ -76,8 +81,12 @@ export type MbtiQuestionsResponse = {
 export type MbtiResult = {
   personaKey: string;
   title: string;
+  subtitle: string;
+  emoji: string;
   body: string;
+  traits: string[];
   menus: string[];
+  mechuriTip: string;
 };
 
 export type PersonaKey =
@@ -86,7 +95,17 @@ export type PersonaKey =
   | 'adventure'
   | 'light'
   | 'spicy'
-  | 'sweet';
+  | 'sweet'
+  | 'social'
+  | 'comfort'
+  | 'budget'
+  | 'night'
+  | 'health'
+  | 'brunch'
+  | 'noodle'
+  | 'rice'
+  | 'delivery'
+  | 'picky';
 
 export type NearbyDistrict = {
   id: string;
@@ -99,6 +118,11 @@ export type NearbyPlace = {
   name: string;
   category: string;
   walkMin: number;
+  distanceM?: number;
+  lat?: number;
+  lng?: number;
+  address?: string;
+  placeUrl?: string;
 };
 
 export type RecipeSummary = {
@@ -125,5 +149,7 @@ export type NearbyPickResult = {
   districtId: string;
   districtLabel: string;
   radiusWalkMin: number;
+  userLat?: number;
+  userLng?: number;
   places: NearbyPlace[];
 };

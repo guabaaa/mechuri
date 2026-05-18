@@ -1,11 +1,10 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { fetchTodayMenu } from '../api/menusApi';
-import { diceIcon } from '../assets';
+import { deliveryIcon, diceIcon, todayMenuLogo } from '../assets';
 import {
   FeatureActionButton,
   MenuRevealOverlay,
-  QuailMascot,
   ScreenContainer,
 } from '../components';
 import { useMenuReveal } from '../hooks/useMenuReveal';
@@ -43,8 +42,12 @@ export default function TodayScreen({ navigation }: Props) {
         </Pressable>
 
         <View style={styles.hero}>
-          <QuailMascot size="md" />
-          <Text style={styles.head}>오늘 메뉴 뽑기</Text>
+          <Image
+            source={todayMenuLogo}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="오늘 메뉴 뽑기"
+          />
           <Text style={styles.sub}>어떻게 골라볼까요?</Text>
         </View>
 
@@ -68,7 +71,7 @@ export default function TodayScreen({ navigation }: Props) {
           />
           <FeatureActionButton
             label="배달 메뉴 뽑기"
-            icon="🛵"
+            iconImage={deliveryIcon}
             tint={homeTileTints.delivery}
             disabled={isBusy}
             onPress={() => navigation.navigate('DeliveryPick')}
@@ -97,21 +100,21 @@ const styles = StyleSheet.create({
   },
   hero: {
     alignItems: 'center',
-    paddingVertical: 12,
-    marginBottom: 24,
+    paddingVertical: 8,
+    marginBottom: 20,
   },
-  head: {
-    fontFamily: fonts.display,
-    fontSize: 24,
-    color: colors.brown,
-    marginTop: 12,
+  logo: {
+    width: 280,
+    height: 184,
+    marginBottom: 8,
   },
   sub: {
     fontFamily: fonts.body,
     fontSize: 14,
     color: colors.taupe,
-    marginTop: 8,
+    marginTop: 6,
     textAlign: 'center',
+    lineHeight: 21,
   },
   actions: { gap: 14, marginTop: 4, marginBottom: 8 },
   hint: {

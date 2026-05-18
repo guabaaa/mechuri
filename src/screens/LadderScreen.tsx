@@ -2,16 +2,17 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { ladderIcon, ladderPageLogo } from '../assets';
 import {
   FeatureActionButton,
   LadderBoard,
-  QuailMascot,
   ScreenContainer,
 } from '../components';
 import type { HomeStackParamList } from '../navigation/types';
@@ -180,8 +181,12 @@ export default function LadderScreen({ navigation }: Props) {
         </Pressable>
 
         <View style={styles.hero}>
-          <QuailMascot size="sm" />
-          <Text style={styles.head}>메뉴 사다리타기</Text>
+          <Image
+            source={ladderPageLogo}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="메뉴 사다리타기"
+          />
           <Text style={styles.sub}>
             {phase === 'edit'
               ? '후보 메뉴를 직접 넣고, 사다리로 한 끼를 정해요'
@@ -231,7 +236,7 @@ export default function LadderScreen({ navigation }: Props) {
 
             <FeatureActionButton
               label="사다리 타기!"
-              icon="🪜"
+              iconImage={ladderIcon}
               tint={homeTileTints.ladder}
               onPress={runLadder}
             />
@@ -254,7 +259,15 @@ export default function LadderScreen({ navigation }: Props) {
 
             {phase === 'result' && result ? (
               <View style={styles.resultSection}>
-                <Text style={styles.resultBadge}>🪜 사다리타기 결과</Text>
+                <View style={styles.resultBadgeRow}>
+                  <Image
+                    source={ladderIcon}
+                    style={styles.resultBadgeIcon}
+                    resizeMode="contain"
+                    accessibilityElementsHidden
+                  />
+                  <Text style={styles.resultBadge}>사다리타기 결과</Text>
+                </View>
 
                 <View style={styles.resultCard}>
                   <Text style={styles.resultEmoji}>{menuEmoji(result.menu)}</Text>
@@ -268,7 +281,7 @@ export default function LadderScreen({ navigation }: Props) {
                 <View style={styles.actions}>
                   <FeatureActionButton
                     label="다시 사다리 타기"
-                    icon="🪜"
+                    iconImage={ladderIcon}
                     tint={homeTileTints.ladder}
                     onPress={runLadder}
                   />
@@ -308,19 +321,19 @@ const styles = StyleSheet.create({
   backTextDisabled: { opacity: 0.35 },
   hero: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
+    paddingVertical: 4,
   },
-  head: {
-    fontFamily: fonts.display,
-    fontSize: 24,
-    color: colors.brown,
-    marginTop: 8,
+  logo: {
+    width: 280,
+    height: 184,
+    marginBottom: 8,
   },
   sub: {
     fontFamily: fonts.body,
     fontSize: 14,
     color: colors.taupe,
-    marginTop: 6,
+    marginTop: 4,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -426,12 +439,21 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderTopColor: colors.tileBorder,
   },
+  resultBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 14,
+  },
+  resultBadgeIcon: {
+    width: 22,
+    height: 22,
+  },
   resultBadge: {
     fontFamily: fonts.display,
     fontSize: 16,
     color: colors.brown,
-    textAlign: 'center',
-    marginBottom: 14,
   },
   resultCard: {
     backgroundColor: colors.white,

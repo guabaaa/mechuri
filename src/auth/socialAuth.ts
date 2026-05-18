@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import { login as kakaoLogin } from '@react-native-kakao/user';
 import NaverLogin from '@react-native-seoul/naver-login';
 import {
   GoogleSignin,
@@ -10,15 +9,30 @@ import {
 import appleAuth from '@invertase/react-native-apple-authentication';
 import type { AuthProviderId } from '../api/types';
 import { authConfig, authSetupHint, isAuthProviderConfigured } from '../config/auth';
+import { signInWithKakao, signOutKakao } from './kakaoAuth';
+import { initAuthSdks } from './initAuth';
 import { SocialAuthError } from './SocialAuthError';
 import type { SocialCredential } from './types';
 
-async function signInKakao(): Promise<SocialCredential> {
-  const result = await kakaoLogin();
-  return { provider: 'kakao', accessToken: result.accessToken };
+function ensureNaverInitialized() {
+  const n = authConfig.naver;
+  if (!n.consumerKey || !n.consumerSecret) {
+    throw new SocialAuthError(
+      'NOT_CONFIGURED',
+      authSetupHint('naver') || '네이버 로그인 설정이 필요해요.',
+    );
+  }
+  NaverLogin.initialize({
+    appName: n.appName,
+    consumerKey: n.consumerKey,
+    consumerSecret: n.consumerSecret,
+    disableNaverAppAuthIOS: n.disableNaverAppAuthIOS,
+    serviceUrlSchemeIOS: n.urlScheme,
+  });
 }
 
 async function signInNaver(): Promise<SocialCredential> {
+  ensureNaverInitialized();
   const result = await NaverLogin.login();
   if (!result.isSuccess || !result.successResponse?.accessToken) {
     if (result.failureResponse?.isCancel) {
@@ -98,9 +112,10 @@ export async function obtainSocialCredential(
   }
 
   try {
+    await initAuthSdks();
     switch (provider) {
       case 'kakao':
-        return await signInKakao();
+        return await signInWithKakao();
       case 'naver':
         return await signInNaver();
       case 'google':
@@ -127,6 +142,9 @@ export async function obtainSocialCredential(
 
 export async function signOutSocialSdks(provider: AuthProviderId) {
   try {
+    if (provider === 'kakao') {
+      await signOutKakao();
+    }
     if (provider === 'naver' && authConfig.naver.consumerKey) {
       await NaverLogin.logout();
     }

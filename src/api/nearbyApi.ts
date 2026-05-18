@@ -6,7 +6,8 @@ export function fetchNearbyDistricts() {
 }
 
 export function fetchNearbyPick(params: {
-  districtId: string;
+  lat: number;
+  lng: number;
   radiusWalkMin?: 5 | 10 | 15;
   mood?: NearbyMood;
   exclude?: string;

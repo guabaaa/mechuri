@@ -1,4 +1,11 @@
-import { DELIVERY_BRAND_MESSAGES, DELIVERY_BRANDS } from '../data/deliveryBrands';
+import {
+  DELIVERY_BRAND_MESSAGES,
+  DELIVERY_BRANDS,
+  DELIVERY_DESSERT_MESSAGES,
+  DELIVERY_MEAL_MESSAGES,
+  type DeliveryCategory,
+  getDeliveryBrandsByCategory,
+} from '../data/deliveryBrands';
 import {
   ALL_MENUS,
   ROULETTE_POOL,
@@ -17,16 +24,24 @@ export function getMenuPool() {
     menus: [...ALL_MENUS],
     roulettePool: [...ROULETTE_POOL],
     deliveryPool: [...DELIVERY_BRANDS],
+    deliveryMealPool: [...getDeliveryBrandsByCategory('meal')],
+    deliveryDessertPool: [...getDeliveryBrandsByCategory('dessert')],
   };
 }
 
-export function pickDeliveryMenu(exclude?: string) {
-  const brand = pickRandom(DELIVERY_BRANDS, exclude);
+export function pickDeliveryMenu(
+  exclude?: string,
+  category: DeliveryCategory = 'meal',
+) {
+  const pool = getDeliveryBrandsByCategory(category);
+  const brand = pickRandom(pool, exclude);
+  const messages =
+    category === 'dessert' ? DELIVERY_DESSERT_MESSAGES : DELIVERY_MEAL_MESSAGES;
+  const fallback = DELIVERY_BRAND_MESSAGES;
+  const messagePool = messages.length > 0 ? messages : fallback;
   const message =
-    DELIVERY_BRAND_MESSAGES[
-      Math.floor(Math.random() * DELIVERY_BRAND_MESSAGES.length)
-    ]!;
-  return { menu: brand, message, kind: 'brand' as const };
+    messagePool[Math.floor(Math.random() * messagePool.length)]!;
+  return { menu: brand, message, kind: 'brand' as const, category };
 }
 
 export function pickTodayMenu(exclude?: string) {

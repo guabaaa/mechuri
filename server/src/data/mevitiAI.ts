@@ -3,10 +3,19 @@
  * 총 4종. 주차(ISO week) % 4 로 순환.
  */
 
+import {
+  PERSONA_KEYS,
+  PERSONA_RESULTS,
+  type PersonaKey,
+} from './personas';
+
+export type { PersonaKey, PersonaResult } from './personas';
+export { PERSONA_KEYS, PERSONA_RESULTS };
+
 export type MevQuestion = {
   id: string;
   title: string;
-  options: { id: string; label: string; persona: string }[];
+  options: { id: string; label: string; persona: PersonaKey }[];
 };
 
 export type MevSet = {
@@ -14,62 +23,6 @@ export type MevSet = {
   title: string;
   description: string;
   questions: MevQuestion[];
-};
-
-export type PersonaKey =
-  | 'hearty'
-  | 'quick'
-  | 'adventure'
-  | 'light'
-  | 'spicy'
-  | 'sweet'
-  | 'social'
-  | 'comfort';
-
-export const PERSONA_RESULTS: Record<
-  PersonaKey,
-  { title: string; body: string; menus: string[] }
-> = {
-  hearty: {
-    title: '국밥 안정형',
-    body: '든든한 한 끼에서 안정감을 찾는 타입이에요. 메뉴 실패를 극도로 싫어하고, 검증된 맛을 선호해요. 오늘도 힘내세요!',
-    menus: ['돼지국밥', '순대국', '설렁탕'],
-  },
-  quick: {
-    title: '효율 편의점형',
-    body: '시간 대비 만족을 최우선으로 생각해요. 빠르고 합리적인 선택이 몸에 배어 있어요.',
-    menus: ['편의점 도시락', '삼각김밥', '컵라면'],
-  },
-  adventure: {
-    title: '맛집 탐험가',
-    body: '웨이팅도 즐기고, 새로운 메뉴에 두려움이 없어요. 인스타 맛집이 주식(?)이에요.',
-    menus: ['마라탕', '회', '브런치 세트'],
-  },
-  light: {
-    title: '밸런스 가벼운 한 끼형',
-    body: '속 부담을 줄이고 오후 컨디션을 지키는 스타일이에요. 건강한 선택을 자연스럽게 해요.',
-    menus: ['샐러드', '비빔밥', '순두부찌개'],
-  },
-  spicy: {
-    title: '스트레스 불태우는 매운맛형',
-    body: '자극적인 맛으로 스트레스를 확 날려버리는 타입이에요. 매운 거 먹으면 인생이 풀려요.',
-    menus: ['매운 닭갈비', '마라탕', '제육볶음'],
-  },
-  sweet: {
-    title: '당 충전 달달형',
-    body: '기분 전환은 달달함으로! 디저트가 밥이 될 수 있다고 생각하는 낭만파예요.',
-    menus: ['팥빙수', '크로와상', '카페 브런치'],
-  },
-  social: {
-    title: '회식 리더형',
-    body: '함께 먹는 것 자체를 즐기고, 단체 메뉴 결정을 기꺼이 나서서 해요. 분위기 메이커!',
-    menus: ['삼겹살', '치킨', '족발'],
-  },
-  comfort: {
-    title: '집밥 그리움형',
-    body: '어릴 때 먹던 맛, 따뜻하고 정겨운 음식이 최고예요. 엄마 손맛을 찾아 헤매는 타입.',
-    menus: ['된장찌개', '제육덮밥', '김치볶음밥'],
-  },
 };
 
 /** ISO week number (1~53) */
@@ -117,7 +70,7 @@ export const MEVITIAI_SETS: MevSet[] = [
           { id: 'a', label: '빠르게 먹을 수 있는 국밥', persona: 'hearty' },
           { id: 'b', label: '편의점 도시락', persona: 'quick' },
           { id: 'c', label: '그래도 맛집 웨이팅', persona: 'adventure' },
-          { id: 'd', label: '커피랑 빵으로 해결', persona: 'light' },
+          { id: 'd', label: '커피랑 빵으로 해결', persona: 'brunch' },
         ],
       },
       {
@@ -166,7 +119,7 @@ export const MEVITIAI_SETS: MevSet[] = [
         options: [
           { id: 'a', label: '아이스 아메리카노', persona: 'light' },
           { id: 'b', label: '케이크·마카롱', persona: 'sweet' },
-          { id: 'c', label: '디저트는 스킵', persona: 'quick' },
+          { id: 'c', label: '디저트는 스킵', persona: 'budget' },
           { id: 'd', label: '동료랑 카페 가서 수다', persona: 'social' },
         ],
       },
@@ -184,7 +137,7 @@ export const MEVITIAI_SETS: MevSet[] = [
           { id: 'a', label: '어디 브런치 맛집 가볼까', persona: 'adventure' },
           { id: 'b', label: '국 끓여서 밥 먹어야지', persona: 'comfort' },
           { id: 'c', label: '편의점 가서 간단히', persona: 'quick' },
-          { id: 'd', label: '다이어트 스타트!', persona: 'light' },
+          { id: 'd', label: '다이어트 스타트!', persona: 'health' },
         ],
       },
       {
@@ -223,8 +176,8 @@ export const MEVITIAI_SETS: MevSet[] = [
         options: [
           { id: 'a', label: '떡볶이·순대 길거리 간식', persona: 'spicy' },
           { id: 'b', label: '집 근처 단골 분식', persona: 'comfort' },
-          { id: 'c', label: '배달 앱 켜서 빠르게', persona: 'quick' },
-          { id: 'd', label: '과일·요거트로 가볍게', persona: 'light' },
+          { id: 'c', label: '배달 앱 켜서 빠르게', persona: 'delivery' },
+          { id: 'd', label: '과일·요거트로 가볍게', persona: 'health' },
         ],
       },
       {
@@ -233,7 +186,7 @@ export const MEVITIAI_SETS: MevSet[] = [
         options: [
           { id: 'a', label: '가족이랑 집에서 든든하게', persona: 'comfort' },
           { id: 'b', label: '친구들이랑 고기 파티', persona: 'social' },
-          { id: 'c', label: '혼자 영화 보며 치킨', persona: 'quick' },
+          { id: 'c', label: '혼자 영화 보며 치킨', persona: 'night' },
           { id: 'd', label: '새로 연 파인다이닝', persona: 'adventure' },
         ],
       },
@@ -301,7 +254,7 @@ export const MEVITIAI_SETS: MevSet[] = [
           { id: 'a', label: '엄마 손맛 같은 집밥', persona: 'comfort' },
           { id: 'b', label: '평소 안 먹던 특별한 맛', persona: 'adventure' },
           { id: 'c', label: '빨리 먹고 쉬는 게 우선', persona: 'quick' },
-          { id: 'd', label: '든든한 국물 한 그릇', persona: 'hearty' },
+          { id: 'd', label: '든든한 국물 한 그릇', persona: 'noodle' },
         ],
       },
     ],
@@ -328,7 +281,7 @@ export const MEVITIAI_SETS: MevSet[] = [
           { id: 'a', label: '인스타·유튜브 매일 검색', persona: 'adventure' },
           { id: 'b', label: '동네 단골 그냥 가요', persona: 'comfort' },
           { id: 'c', label: '회사 동료 추천', persona: 'social' },
-          { id: 'd', label: '네이버 별점·리뷰 꼼꼼히', persona: 'quick' },
+          { id: 'd', label: '네이버 별점·리뷰 꼼꼼히', persona: 'picky' },
         ],
       },
       {
@@ -336,7 +289,7 @@ export const MEVITIAI_SETS: MevSet[] = [
         title: '메뉴 고르는 데 얼마나 걸리나요?',
         options: [
           { id: 'a', label: '1초도 안 걸려, 맨날 같은 것', persona: 'comfort' },
-          { id: 'b', label: '5분은 기본, 신중해요', persona: 'light' },
+          { id: 'b', label: '5분은 기본, 신중해요', persona: 'picky' },
           { id: 'c', label: '일단 맵고 자극적인 거', persona: 'spicy' },
           { id: 'd', label: '새로운 거 도전해보자', persona: 'adventure' },
         ],
@@ -365,10 +318,10 @@ export const MEVITIAI_SETS: MevSet[] = [
         id: 'd6',
         title: '음식에 돈을 쓸 때, 당신의 기준은?',
         options: [
-          { id: 'a', label: '가성비 최우선', persona: 'quick' },
+          { id: 'a', label: '가성비 최우선', persona: 'budget' },
           { id: 'b', label: '맛이면 비싸도 OK', persona: 'adventure' },
           { id: 'c', label: '건강·영양이 먼저', persona: 'light' },
-          { id: 'd', label: '양 많고 든든하면 됨', persona: 'hearty' },
+          { id: 'd', label: '양 많고 든든하면 됨', persona: 'rice' },
         ],
       },
     ],
@@ -384,10 +337,9 @@ export function getCurrentSet(date: Date = new Date()): MevSet {
 }
 
 export function resolvePersona(counts: Record<string, number>): PersonaKey {
-  const keys = Object.keys(counts) as PersonaKey[];
   let best: PersonaKey = 'hearty';
   let max = -1;
-  for (const k of keys) {
+  for (const k of PERSONA_KEYS) {
     const c = counts[k] ?? 0;
     if (c > max) {
       max = c;

@@ -1,6 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import SplashScreen from '../components/SplashScreen';
-import { LoginScreen } from '../screens';
+import { LoginScreen, TermsConsentScreen } from '../screens';
 import MainTabNavigator from './MainTabNavigator';
 
 export default function RootNavigator() {
@@ -12,6 +12,10 @@ export default function RootNavigator() {
 
   if (!user) {
     return <LoginScreen />;
+  }
+
+  if (!user.hasConsents) {
+    return <TermsConsentScreen />;
   }
 
   return <MainTabNavigator />;

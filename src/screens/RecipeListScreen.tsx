@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -12,9 +13,10 @@ import {
 import { ApiError } from '../api/client';
 import { fetchRecipeList } from '../api/recipeApi';
 import type { RecipeSummary } from '../api/types';
-import { QuailMascot, ScreenContainer } from '../components';
+import { recipePageLogo } from '../assets';
+import { ScreenContainer } from '../components';
 import type { RecipeStackParamList } from '../navigation/types';
-import { colors, homeTileTints, shadows } from '../theme';
+import { colors, shadows } from '../theme';
 import { fonts } from '../theme/typography';
 import { menuEmoji } from '../utils/menuEmoji';
 
@@ -58,8 +60,12 @@ export default function RecipeListScreen() {
   return (
     <ScreenContainer>
       <View style={styles.hero}>
-        <QuailMascot size="sm" />
-        <Text style={styles.head}>레시피</Text>
+        <Image
+          source={recipePageLogo}
+          style={styles.logo}
+          resizeMode="contain"
+          accessibilityLabel="레시피"
+        />
         <Text style={styles.sub}>메뉴 이름으로 만드는 법을 찾아보세요</Text>
       </View>
 
@@ -116,18 +122,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginTop: 4,
   },
-  head: {
-    fontFamily: fonts.display,
-    fontSize: 24,
-    color: colors.brown,
-    marginTop: 8,
+  logo: {
+    width: 220,
+    height: 144,
+    marginBottom: 8,
   },
   sub: {
     fontFamily: fonts.body,
     fontSize: 14,
     color: colors.taupe,
-    marginTop: 6,
+    marginTop: 4,
     textAlign: 'center',
+    lineHeight: 21,
   },
   search: {
     fontFamily: fonts.body,

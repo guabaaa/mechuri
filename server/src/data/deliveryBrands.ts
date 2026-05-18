@@ -1,5 +1,9 @@
 /** 배달·프랜차이즈 상호 (메뉴 종류가 아닌 브랜드명) */
-export const DELIVERY_BRANDS = [
+
+export type DeliveryCategory = 'meal' | 'dessert';
+
+/** 식사류 — 치킨·피자·한식·패스트푸드 등 */
+export const DELIVERY_MEAL_BRANDS = [
   'BHC치킨',
   'BBQ치킨',
   '교촌치킨',
@@ -15,6 +19,15 @@ export const DELIVERY_BRANDS = [
   '국민통닭',
   '또래오래',
   '간장치킨',
+  '바른치킨',
+  '치킨마루',
+  '충만치킨',
+  '오늘통닭',
+  '치킨신드롬',
+  '지코바',
+  '이춘봉인생치킨',
+  '치킨플러스',
+  '또봉이통닭',
   '도미노피자',
   '피자헛',
   '파파존스',
@@ -22,19 +35,16 @@ export const DELIVERY_BRANDS = [
   '반올림피자',
   '피자알볼로',
   '피자스쿨',
+  '피자마루',
+  '피자몬스터',
   '맥도날드',
   '버거킹',
   '롯데리아',
   '맘스터치',
-  '쉑쉑버거',
+  '쉐이크쉑',
   '노브랜드버거',
   '버거앤프라이즈',
-  '스타벅스',
-  '이디야커피',
-  '메가커피',
-  '빽다방',
-  '컴포즈커피',
-  '투썸플레이스',
+  '프랭크버거',
   '탕화쿵푸마라탕',
   '홍콩반점0410',
   '북경반점',
@@ -43,7 +53,7 @@ export const DELIVERY_BRANDS = [
   '족발예찬',
   '장충동왕족발',
   '원할머니보쌈족발',
-  '이춘봉인생치킨',
+  '한양족발',
   '신전떡볶이',
   '죠스떡볶이',
   '엽기떡볶이',
@@ -53,12 +63,7 @@ export const DELIVERY_BRANDS = [
   '김가네',
   '한신포차',
   '역전우동',
-  '바른치킨',
-  '치킨마루',
-  '충만치킨',
-  '오늘통닭',
-  '치킨신드롬',
-  '지코바',
+  '오봉집',
   '아웃백',
   '빕스',
   '애슐리',
@@ -73,26 +78,33 @@ export const DELIVERY_BRANDS = [
   '백소정',
   '타코벨',
   '서브웨이',
+  '롤링파스타',
+  '삼겹살의민족',
+  '고래사어묵',
+] as const;
+
+/** 디저트·카페류 — 커피·베이커리·아이스크림 등 */
+export const DELIVERY_DESSERT_BRANDS = [
+  '스타벅스',
+  '이디야커피',
+  '메가커피',
+  '빽다방',
+  '컴포즈커피',
+  '투썸플레이스',
+  '할리스커피',
+  '공차',
   '파리바게뜨',
   '뚜레쥬르',
   '던킨도너츠',
   '베스킨라빈스',
   '설빙',
-  '할리스커피',
-  '공차',
   'GONTRAN쉐리에',
-  '쉐이크쉑',
-  '프랭크버거',
-  '롤링파스타',
-  '피자마루',
-  '피자몬스터',
-  '치킨플러스',
-  '또봉이통닭',
-  '오봉집',
-  '한양족발',
-  '삼겹살의민족',
-  '고래사어묵',
   '쥬씨',
+] as const;
+
+export const DELIVERY_BRANDS = [
+  ...DELIVERY_MEAL_BRANDS,
+  ...DELIVERY_DESSERT_BRANDS,
 ] as const;
 
 export const DELIVERY_BRAND_MESSAGES = [
@@ -103,3 +115,21 @@ export const DELIVERY_BRAND_MESSAGES = [
   '메추리가 골라본 배달 맛집 브랜드예요!',
   '친구랑 나눠 먹기 좋은 브랜드예요.',
 ];
+
+export const DELIVERY_MEAL_MESSAGES = [
+  '오늘 식사는 이 브랜드로 배달 어때요?',
+  '든든하게 한 끼, 이 상호 추천해요!',
+  '점심·저녁 배달 고민 끝, 메추리 픽이에요.',
+  '배고플 때 딱인 식사 브랜드예요.',
+];
+
+export const DELIVERY_DESSERT_MESSAGES = [
+  '달달한 거 당길 때 이 브랜드 어때요?',
+  '커피·디저트 배달, 메추리가 골랐어요!',
+  '힐링 디저트 타임, 이 상호 추천!',
+  '간식·음료 각 나올 때 딱이에요.',
+];
+
+export function getDeliveryBrandsByCategory(category: DeliveryCategory) {
+  return category === 'dessert' ? DELIVERY_DESSERT_BRANDS : DELIVERY_MEAL_BRANDS;
+}

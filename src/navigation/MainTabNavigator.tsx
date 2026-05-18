@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Text } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
+import { homeIcon, mypageIcon, nearbyIcon, recipeIcon } from '../assets';
 import { NearbyPickScreen, ProfileScreen } from '../screens';
 import { colors } from '../theme';
 import { fonts } from '../theme/typography';
@@ -9,9 +10,22 @@ import RecipeStackNavigator from './RecipeStackNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
+function TabImageIcon({
+  source,
+  label,
+  focused,
+}: {
+  source: number;
+  label: string;
+  focused: boolean;
+}) {
   return (
-    <Text style={[styles.icon, focused && styles.iconFocused]}>{emoji}</Text>
+    <Image
+      source={source}
+      style={[styles.tabImage, !focused && styles.tabImageInactive]}
+      resizeMode="contain"
+      accessibilityLabel={label}
+    />
   );
 }
 
@@ -30,7 +44,9 @@ export default function MainTabNavigator() {
         component={HomeStackNavigator}
         options={{
           tabBarLabel: '홈',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabImageIcon source={homeIcon} label="홈" focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
@@ -38,7 +54,9 @@ export default function MainTabNavigator() {
         component={NearbyPickScreen}
         options={{
           tabBarLabel: '근처',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📍" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabImageIcon source={nearbyIcon} label="근처" focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
@@ -46,7 +64,9 @@ export default function MainTabNavigator() {
         component={RecipeStackNavigator}
         options={{
           tabBarLabel: '레시피',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📖" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabImageIcon source={recipeIcon} label="레시피" focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
@@ -54,7 +74,9 @@ export default function MainTabNavigator() {
         component={ProfileScreen}
         options={{
           tabBarLabel: '마이페이지',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabImageIcon source={mypageIcon} label="마이페이지" focused={focused} />
+          ),
         }}
       />
     </Tab.Navigator>
@@ -74,6 +96,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 11,
   },
-  icon: { fontSize: 22, opacity: 0.6 },
-  iconFocused: { opacity: 1 },
+  tabImage: { width: 26, height: 26 },
+  tabImageInactive: { opacity: 0.55 },
 });

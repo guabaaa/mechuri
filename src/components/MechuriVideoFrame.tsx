@@ -64,9 +64,12 @@ export default function MechuriVideoFrame({
         repeat={repeat}
         rate={playbackRate}
         muted
+        volume={0}
         playInBackground={false}
         playWhenInactive={false}
-        ignoreSilentSwitch="ignore"
+        mixWithOthers="mix"
+        disableFocus
+        disableAudioSessionManagement
         onEnd={onEnd}
         onError={onError}
       />

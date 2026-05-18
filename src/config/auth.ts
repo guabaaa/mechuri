@@ -1,7 +1,16 @@
 import type { AuthProviderId } from '../api/types';
 
+/** iOS Info.plist · ios/Mechuri/NaverLoginConfig.swift 와 동일하게 유지 */
+export const NAVER_IOS_URL_SCHEME = 'mechurinaver';
+
+export type KakaoAuthConfig = {
+  nativeAppKey: string;
+  /** 카카오 로컬·지도 API (서버가 auth.local 에서 자동 읽음) */
+  restApiKey?: string;
+};
+
 export type AuthConfig = {
-  kakao: { nativeAppKey: string };
+  kakao: KakaoAuthConfig;
   naver: {
     consumerKey: string;
     consumerSecret: string;
@@ -13,7 +22,7 @@ export type AuthConfig = {
 };
 
 const defaults: AuthConfig = {
-  kakao: { nativeAppKey: '' },
+  kakao: { nativeAppKey: '', restApiKey: '' },
   naver: {
     consumerKey: '',
     consumerSecret: '',
@@ -61,6 +70,11 @@ export function isAuthProviderConfigured(provider: AuthProviderId) {
     return true;
   }
   return false;
+}
+
+/** iOS URL Scheme / Android OAuth scheme: kakao{nativeAppKey} */
+export function kakaoUrlScheme(nativeAppKey: string) {
+  return `kakao${nativeAppKey}`;
 }
 
 export function authSetupHint(provider: AuthProviderId) {
