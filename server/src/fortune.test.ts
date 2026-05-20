@@ -29,6 +29,13 @@ describe('fortuneService', () => {
     assert.equal(a.score, b.score);
     assert.equal(a.topPick, b.topPick);
   });
+
+  it('score is in the raised range 76–97', () => {
+    const birthday = new Date(1990, 2, 3);
+    const today = new Date(2026, 4, 14);
+    const { score } = buildFortuneFromBirthday(birthday, today);
+    assert.ok(score >= 76 && score <= 97, `score ${score}`);
+  });
 });
 
 describe('mevitiAI', () => {

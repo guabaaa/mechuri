@@ -8,6 +8,7 @@ import {
   MenuChooseScreen,
   MenuResultScreen,
   LadderScreen,
+  MealRecordScreen,
   NearbyPickScreen,
   RecipeScreen,
   TodayScreen,
@@ -33,6 +34,7 @@ export default function HomeStackNavigator() {
       <Stack.Screen name="MbtiResult" component={MbtiResultScreen} />
       <Stack.Screen name="Ladder" component={LadderScreen} />
       <Stack.Screen name="Fortune" component={FortuneScreen} />
+      <Stack.Screen name="MealRecord" component={MealRecordScreen} />
       <Stack.Screen name="NearbyPick" component={NearbyPickScreen} />
       <Stack.Screen name="Recipe" component={RecipeScreen} />
     </Stack.Navigator>

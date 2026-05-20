@@ -1466,8 +1466,52 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-blob-util (0.24.8):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-geolocation-service (5.3.1):
     - React
+  - react-native-image-picker (8.2.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-maps (1.27.2):
     - react-native-maps/Maps (= 1.27.2)
   - react-native-maps/Generated (1.27.2):
@@ -2086,6 +2130,28 @@ PODS:
     - ReactNativeDependencies
     - RNCKakaoCore
     - Yoga
+  - RNDateTimePicker (9.1.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNGestureHandler (2.31.2):
     - hermes-engine
     - RCTRequired
@@ -2267,7 +2333,9 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - React-mutationobservernativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver`)
+  - react-native-blob-util (from `../node_modules/react-native-blob-util`)
   - react-native-geolocation-service (from `../node_modules/react-native-geolocation-service`)
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-video (from `../node_modules/react-native-video`)
@@ -2308,6 +2376,7 @@ DEPENDENCIES:
   - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - "RNCKakaoCore (from `../node_modules/@react-native-kakao/core`)"
   - "RNCKakaoUser (from `../node_modules/@react-native-kakao/user`)"
+  - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - "RNNaverLogin (from `../node_modules/@react-native-seoul/naver-login`)"
@@ -2412,8 +2481,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   React-mutationobservernativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver"
+  react-native-blob-util:
+    :path: "../node_modules/react-native-blob-util"
   react-native-geolocation-service:
     :path: "../node_modules/react-native-geolocation-service"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-maps:
     :path: "../node_modules/react-native-maps"
   react-native-safe-area-context:
@@ -2494,6 +2567,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-kakao/core"
   RNCKakaoUser:
     :path: "../node_modules/@react-native-kakao/user"
+  RNDateTimePicker:
+    :path: "../node_modules/@react-native-community/datetimepicker"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
@@ -2560,7 +2635,9 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 1aa9126122d4247ffc24bf9d28d50ce923499a71
   React-microtasksnativemodule: d86581169e9bb5bb6f5fc3c5052f890016c1bf21
   React-mutationobservernativemodule: 9a0c4e866f1ef2a57acebc902ebacbdf469ae741
+  react-native-blob-util: d8bd308898ccd721308773f6144d7f5b2e06fb8c
   react-native-geolocation-service: 608e1da71a1ac31b4de64d9ef2815f697978c55b
+  react-native-image-picker: 2146157d5d37a34c2063d1d2ed01081b56d0b87b
   react-native-maps: 1a556e36c3a579fec607f41a800e3d18b2a8f0ed
   react-native-safe-area-context: a2325922b8594ddd27f98fb13437aec126be2502
   react-native-video: 84f5283aaed3484b5b4914095ab16a9dd3477cca
@@ -2601,13 +2678,14 @@ SPEC CHECKSUMS:
   RNAppleAuthentication: d6fe579e5f43cf8db54bdc48518bccea61c592a4
   RNCKakaoCore: 5738e6ca3a0b7281b596071a615b5db0e5881b84
   RNCKakaoUser: 8e024b251b8b823d9a3437ffcdd176472b7a5548
+  RNDateTimePicker: c33c46d089998652b576a58ac08108db8c9af6f1
   RNGestureHandler: acf7db8499c11193d9b4b6b1cc1439ff4f01a693
   RNGoogleSignin: 7b48b915471868fcc2a160aaaa26ad27a6e6d484
   RNNaverLogin: e8e8146fbef65a794a3b8ef85bd357dd0fe4660c
-  RNPermissions: 6b8a147eb8290ec016bfc8be0f7373043c2f7c2d
+  RNPermissions: 62bd1e962ed37a3290984e504742cf8209e1ed00
   RNScreens: 2ea36a0d6aaf140c9b59a7e47f32ec12d2359a7c
   Yoga: 36fee8f1fca3f54a28c3d7f80e69f66d73d3af96
 
-PODFILE CHECKSUM: eccc817960bb01327b4150d5849fe649883569e9
+PODFILE CHECKSUM: ebccaae0ebf92a67b83e1ab9f4fe264bbdfece27
 
 COCOAPODS: 1.15.2

@@ -12,7 +12,7 @@ export default function MbtiResultScreen({ navigation, route }: Props) {
   const { result } = route.params;
   return (
     <View style={styles.root}>
-      <ScreenContainer contentStyle={styles.screen}>
+      <ScreenContainer contentStyle={styles.screen} resetScrollOnFocus>
         <View style={styles.hero}>
           <QuailMascot size="sm" />
           <Text style={styles.kicker}>메비티아이 결과</Text>

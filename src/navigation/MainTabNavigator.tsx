@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { homeIcon, mypageIcon, nearbyIcon, recipeIcon } from '../assets';
 import { NearbyPickScreen, ProfileScreen } from '../screens';
 import { colors } from '../theme';
@@ -29,14 +30,23 @@ function TabImageIcon({
   );
 }
 
+const TAB_CONTENT_HEIGHT = 50;
+
 export default function MainTabNavigator() {
+  const insets = useSafeAreaInsets();
+  const tabBarPaddingBottom = Math.max(insets.bottom, 8);
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.brown,
         tabBarInactiveTintColor: colors.taupe,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: {
+          ...styles.tabBar,
+          paddingBottom: tabBarPaddingBottom,
+          height: TAB_CONTENT_HEIGHT + 6 + tabBarPaddingBottom,
+        },
         tabBarLabelStyle: styles.tabLabel,
       }}>
       <Tab.Screen
@@ -88,8 +98,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopWidth: 2,
     borderTopColor: colors.brown,
-    height: 64,
-    paddingBottom: 8,
     paddingTop: 6,
   },
   tabLabel: {

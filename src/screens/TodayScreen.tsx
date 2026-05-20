@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { fetchTodayMenu } from '../api/menusApi';
-import { deliveryIcon, diceIcon, todayMenuLogo } from '../assets';
+import { deliveryIcon, diceIcon, targetIcon, todayMenuLogo } from '../assets';
 import {
   FeatureActionButton,
   MenuRevealOverlay,
@@ -36,7 +36,7 @@ export default function TodayScreen({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <ScreenContainer>
+      <ScreenContainer resetScrollOnFocus>
         <Pressable onPress={() => navigation.goBack()} style={styles.back}>
           <Text style={styles.backText}>← 홈</Text>
         </Pressable>
@@ -64,7 +64,7 @@ export default function TodayScreen({ navigation }: Props) {
           />
           <FeatureActionButton
             label="골라서 뽑기"
-            icon="🎯"
+            iconImage={targetIcon}
             tint={homeTileTints.mbti}
             disabled={isBusy}
             onPress={() => navigation.navigate('MenuChoose')}

@@ -152,4 +152,6 @@ export type NearbyPickResult = {
   userLat?: number;
   userLng?: number;
   places: NearbyPlace[];
+  /** 서버 샘플 데이터 (실제 카카오 검색 아님) */
+  devFallback?: boolean;
 };

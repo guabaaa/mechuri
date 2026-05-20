@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createApp } from './app';
+import { logKakaoKeyStatus } from './config/kakaoKey';
 
 function loadDotEnv() {
   const path = resolve(process.cwd(), '.env');
@@ -32,5 +33,6 @@ const PORT = Number(process.env.PORT) || 3001;
 const app = createApp();
 
 app.listen(PORT, () => {
+  logKakaoKeyStatus();
   console.log(`Mechuri API listening on http://localhost:${PORT}`);
 });

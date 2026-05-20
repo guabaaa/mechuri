@@ -210,7 +210,8 @@ export function buildFortuneFromBirthday(
   const todayMonth = today.getMonth() + 1;
 
   const headline = HEADLINES[pickIndex(seed, HEADLINES.length, 1)]!;
-  const score = 68 + (pickIndex(seed, 33, 2) % 28);
+  /** 76~97 — 이전(68~95)보다 전반적으로 소폭 상향 */
+  const score = 76 + (pickIndex(seed, 33, 2) % 22);
   const scoreCaption = SCORE_CAPTIONS[pickIndex(seed, SCORE_CAPTIONS.length, 3)]!;
   const colorDef = LUCKY_COLORS[pickIndex(seed, LUCKY_COLORS.length, 4)]!;
 

@@ -25,6 +25,7 @@ export const homeTileTints = {
   delivery: '#FFD6E8',
   nearby: '#D6E8FF',
   recipe: '#FFF0E0',
+  meal: '#FFE8CC',
 } as const;
 
 export const homeScreenPadding = 20;

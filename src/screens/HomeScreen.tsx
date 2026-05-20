@@ -12,6 +12,7 @@ import {
   diceIcon,
   fortuneIcon,
   ladderIcon,
+  riceIcon,
   mainLogo,
   mebtiIcon,
   nearbyIcon,
@@ -124,6 +125,16 @@ export default function HomeScreen({ navigation }: Props) {
               label={'오늘의\n운세'}
               tint={homeTileTints.fortune}
               onPress={() => navigation.navigate('Fortune')}
+            />
+          </View>
+        </View>
+        <View style={[styles.row, { gap: homeTileGap }]}>
+          <View style={{ width: tileWidth, height: homeTileHeight }}>
+            <FeatureTile
+              iconImage={riceIcon}
+              label={'오늘의\n밥친구'}
+              tint={homeTileTints.meal}
+              onPress={() => navigation.navigate('MealRecord')}
             />
           </View>
         </View>

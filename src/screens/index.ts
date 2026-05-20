@@ -12,4 +12,5 @@ export { default as MenuChooseScreen } from './MenuChooseScreen';
 export { default as MenuResultScreen } from './MenuResultScreen';
 export { default as ProfileScreen } from './ProfileScreen';
 export { default as LadderScreen } from './LadderScreen';
+export { default as MealRecordScreen } from './MealRecordScreen';
 export { default as TodayScreen } from './TodayScreen';

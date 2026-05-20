@@ -48,7 +48,7 @@ export default function DeliveryPickScreen({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <ScreenContainer>
+      <ScreenContainer resetScrollOnFocus>
         <Pressable onPress={() => navigation.goBack()} style={styles.back}>
           <Text style={styles.backText}>← 홈</Text>
         </Pressable>

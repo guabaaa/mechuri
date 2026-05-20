@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { ApiError } from '../api/client';
 import { mypageMain } from '../assets';
-import { ScreenContainer } from '../components';
+import { MechuriAttendanceCard, ScreenContainer } from '../components';
 import { useAuth } from '../context/AuthContext';
 import { colors, homeTileTints, shadows } from '../theme';
 import { fonts } from '../theme/typography';
@@ -25,6 +25,13 @@ const PROVIDER_LABEL: Record<string, string> = {
 
 const NICKNAME_MAX = 12;
 
+type ProfileTab = 'profile' | 'grow';
+
+const TABS: { id: ProfileTab; label: string }[] = [
+  { id: 'profile', label: '프로필 수정' },
+  { id: 'grow', label: '메추리 키우기' },
+];
+
 function formatJoinedAt(iso?: string) {
   if (!iso) {
     return null;
@@ -36,8 +43,40 @@ function formatJoinedAt(iso?: string) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 }
 
+function ProfileTabBar({
+  active,
+  onChange,
+}: {
+  active: ProfileTab;
+  onChange: (tab: ProfileTab) => void;
+}) {
+  return (
+    <View style={styles.tabBar}>
+      {TABS.map((tab) => {
+        const selected = active === tab.id;
+        return (
+          <Pressable
+            key={tab.id}
+            onPress={() => onChange(tab.id)}
+            style={[
+              styles.tabBtn,
+              selected && styles.tabBtnActive,
+            ]}
+            accessibilityRole="tab"
+            accessibilityState={{ selected }}>
+            <Text style={[styles.tabLabel, selected && styles.tabLabelActive]}>
+              {tab.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 export default function ProfileScreen() {
   const { user, updateNickname, signOut } = useAuth();
+  const [tab, setTab] = useState<ProfileTab>('profile');
   const [draft, setDraft] = useState(user?.nickname ?? '');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -81,7 +120,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScreenContainer contentStyle={styles.screen}>
+    <ScreenContainer contentStyle={styles.screen} resetScrollOnFocus>
       <Text style={styles.title}>마이페이지</Text>
 
       <View style={styles.hero}>
@@ -99,67 +138,81 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <View style={[styles.card, shadows.card]}>
-        <Text style={styles.cardTitle}>프로필 설정</Text>
-        <Text style={styles.fieldLabel}>닉네임</Text>
-        <TextInput
-          style={styles.input}
-          value={draft}
-          onChangeText={(t) => {
-            setDraft(t);
-            setError(null);
-            setMessage(null);
-          }}
-          placeholder="2~12자 닉네임"
-          placeholderTextColor={colors.taupe}
-          maxLength={NICKNAME_MAX}
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!saving}
-        />
-        <Text style={styles.hint}>
-          {trimmed.length}/{NICKNAME_MAX} · 앱에서 보이는 이름이에요
-        </Text>
+      <ProfileTabBar active={tab} onChange={setTab} />
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        {message ? <Text style={styles.success}>{message}</Text> : null}
+      {tab === 'profile' ? (
+        <>
+          <View style={[styles.card, shadows.card]}>
+            <Text style={styles.cardTitle}>프로필 설정</Text>
+            <Text style={styles.fieldLabel}>닉네임</Text>
+            <TextInput
+              style={styles.input}
+              value={draft}
+              onChangeText={(t) => {
+                setDraft(t);
+                setError(null);
+                setMessage(null);
+              }}
+              placeholder="2~12자 닉네임"
+              placeholderTextColor={colors.taupe}
+              maxLength={NICKNAME_MAX}
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!saving}
+            />
+            <Text style={styles.hint}>
+              {trimmed.length}/{NICKNAME_MAX} · 앱에서 보이는 이름이에요
+            </Text>
 
-        <Pressable
-          disabled={!canSave}
-          onPress={onSave}
-          style={({ pressed }) => [
-            styles.saveBtn,
-            !canSave && styles.saveBtnDisabled,
-            pressed && canSave && styles.saveBtnPressed,
-          ]}>
-          {saving ? (
-            <ActivityIndicator color={colors.brown} size="small" />
-          ) : (
-            <Text style={styles.saveBtnText}>닉네임 저장</Text>
-          )}
-        </Pressable>
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {message ? <Text style={styles.success}>{message}</Text> : null}
+
+            <Pressable
+              disabled={!canSave}
+              onPress={onSave}
+              style={({ pressed }) => [
+                styles.saveBtn,
+                !canSave && styles.saveBtnDisabled,
+                pressed && canSave && styles.saveBtnPressed,
+              ]}>
+              {saving ? (
+                <ActivityIndicator color={colors.brown} size="small" />
+              ) : (
+                <Text style={styles.saveBtnText}>닉네임 저장</Text>
+              )}
+            </Pressable>
+          </View>
+
+          <View style={[styles.card, shadows.card]}>
+            <Text style={styles.cardTitle}>계정 정보</Text>
+            <InfoRow
+              label="로그인"
+              value={PROVIDER_LABEL[user.provider] ?? user.provider}
+            />
+            {joinedLabel ? (
+              <InfoRow label="함께한 날" value={`${joinedLabel}부터`} />
+            ) : null}
+            <InfoRow label="계정 ID" value={user.id.slice(-8)} mono />
+          </View>
+
+          <View style={[styles.card, shadows.card]}>
+            <Text style={styles.cardTitle}>메추리 소개</Text>
+            <Text style={styles.body}>
+              오늘 뭐 먹지? 메추리가 골라줄게요. 점메추를 귀엽고 게임처럼 즐길 수
+              있는 점심 메뉴 추천 앱이에요.
+            </Text>
+          </View>
+
+          <Pressable onPress={() => signOut()} style={styles.logout}>
+            <Text style={styles.logoutLabel}>로그아웃</Text>
+          </Pressable>
+        </>
+      ) : null}
+      <View
+        style={tab === 'grow' ? undefined : styles.hiddenTab}
+        pointerEvents={tab === 'grow' ? 'auto' : 'none'}>
+        <MechuriAttendanceCard hideHeader />
       </View>
-
-      <View style={[styles.card, shadows.card]}>
-        <Text style={styles.cardTitle}>계정 정보</Text>
-        <InfoRow label="로그인" value={PROVIDER_LABEL[user.provider] ?? user.provider} />
-        {joinedLabel ? (
-          <InfoRow label="함께한 날" value={`${joinedLabel}부터`} />
-        ) : null}
-        <InfoRow label="계정 ID" value={user.id.slice(-8)} mono />
-      </View>
-
-      <View style={[styles.card, shadows.card]}>
-        <Text style={styles.cardTitle}>메추리 소개</Text>
-        <Text style={styles.body}>
-          오늘 뭐 먹지? 메추리가 골라줄게요. 점메추를 귀엽고 게임처럼 즐길 수 있는
-          점심 메뉴 추천 앱이에요.
-        </Text>
-      </View>
-
-      <Pressable onPress={() => signOut()} style={styles.logout}>
-        <Text style={styles.logoutLabel}>로그아웃</Text>
-      </Pressable>
     </ScreenContainer>
   );
 }
@@ -193,7 +246,7 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     paddingVertical: 4,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   logo: {
     width: 240,
@@ -219,6 +272,36 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 12,
     color: colors.tileText,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: colors.tileBorder,
+    padding: 4,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  tabBtnActive: {
+    backgroundColor: colors.yellow,
+    borderWidth: 2,
+    borderColor: colors.tileBorder,
+  },
+  tabLabel: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.taupe,
+  },
+  tabLabelActive: {
+    fontFamily: fonts.display,
+    color: colors.brown,
   },
   card: {
     backgroundColor: colors.white,
@@ -331,5 +414,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.display,
     fontSize: 16,
     color: colors.red,
+  },
+  hiddenTab: {
+    height: 0,
+    overflow: 'hidden',
+    opacity: 0,
   },
 });

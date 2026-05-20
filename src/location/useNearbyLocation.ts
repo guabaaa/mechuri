@@ -31,7 +31,7 @@ export function useNearbyLocation() {
     return next === RESULTS.GRANTED || next === RESULTS.LIMITED;
   }, []);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (options?: { forceFresh?: boolean }) => {
     setStatus('loading');
     setError(null);
     const granted = await requestPermission();
@@ -60,8 +60,13 @@ export function useNearbyLocation() {
         },
         {
           enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 60000,
+          timeout: 20000,
+          /** true면 캐시된 옛 좌표(시뮬 기본 위치 등) 무시 */
+          maximumAge: options?.forceFresh ? 0 : 10000,
+          forceRequestLocation: options?.forceFresh,
+          ...(Platform.OS === 'android' && options?.forceFresh
+            ? { forceLocationManager: true }
+            : {}),
         },
       );
     });

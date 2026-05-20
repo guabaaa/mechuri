@@ -3,7 +3,11 @@ import { z } from 'zod';
 import { ApiError } from '../middleware/errorHandler';
 import { getNearbyDistricts, pickNearbyMenu } from '../services/nearbyService';
 import { fetchStaticMapImage } from '../services/kakaoMapService';
-import { pickNearbyAtLocation } from '../services/nearbyLocationService';
+import {
+  pickNearbyAtLocation,
+  reverseGeocodeArea,
+} from '../services/nearbyLocationService';
+import { normalizeKoreaCoords } from '../utils/geo';
 
 const router = Router();
 
@@ -52,6 +56,24 @@ router.get('/districts', (_req, res) => {
   res.json({ data: getNearbyDistricts() });
 });
 
+router.get('/area-label', async (req, res, next) => {
+  try {
+    const schema = z.object({
+      lat: z.coerce.number().min(-90).max(90),
+      lng: z.coerce.number().min(-180).max(180),
+    });
+    const parsed = schema.safeParse(req.query);
+    if (!parsed.success) {
+      throw new ApiError(400, 'VALIDATION_ERROR', '위치 좌표가 올바르지 않아요.');
+    }
+    const { lat, lng } = normalizeKoreaCoords(parsed.data.lat, parsed.data.lng);
+    const area = await reverseGeocodeArea(lat, lng);
+    res.json({ data: area });
+  } catch (e) {
+    next(e);
+  }
+});
+
 router.post('/pick', async (req, res, next) => {
   try {
     const gpsSchema = z.object({
@@ -77,7 +99,7 @@ router.post('/pick', async (req, res, next) => {
         throw new ApiError(
           404,
           'NOT_FOUND',
-          '근처 음식점을 찾지 못했어요. 서버에 KAKAO_REST_API_KEY 를 설정해 주세요.',
+          '이 위치 근처에서 음식점을 찾지 못했어요. 위치 새로고침 후 다시 시도하거나 도보 범위를 넓혀 보세요.',
         );
       }
       res.json({ data: result });

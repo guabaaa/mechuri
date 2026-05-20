@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { buildKakaoStaticMapUrl } from '../api/nearbyMapUrl';
 import type { NearbyPlace } from '../api/types';
+import { API_BASE_URL } from '../config/api';
 import { kakaoMapLink } from '../config/maps';
 import { colors } from '../theme';
 import { fonts } from '../theme/typography';
@@ -63,6 +64,8 @@ export default function KakaoStaticMap({
       } catch {
         if (!cancelled) {
           setMapSource(null);
+          setFailed(true);
+          setLoading(false);
         }
       }
     })();
@@ -76,9 +79,13 @@ export default function KakaoStaticMap({
       <View style={[styles.wrap, styles.fallback, { height }]}>
         <Text style={styles.fallbackTitle}>지도를 불러오지 못했어요</Text>
         <Text style={styles.fallbackHint}>
-          yarn server 가 실행 중인지, API 주소(api.local.ts)를 확인해 주세요.{'\n'}
-          카카오 지도를 쓰려면 developers.kakao.com 의 REST API 키를
-          auth.local.ts 의 restApiKey 에 넣고 서버를 재시작하세요.
+          지도 API: {API_BASE_URL}
+          {'\n\n'}
+          {__DEV__
+            ? '개발: 터미널에서 yarn server 실행. 실제 기기면 src/config/api.local.ts 에 맥 IP 설정.'
+            : '인터넷 연결을 확인해 주세요.'}
+          {'\n\n'}
+          카카오 지도(선택): server/.env 또는 auth.local.ts 에 REST API 키 후 서버 재시작.
         </Text>
         <Pressable
           onPress={() => Linking.openURL(kakaoMapLink(userLat, userLng))}

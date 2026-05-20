@@ -7,30 +7,28 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { ApiError } from '../api/client';
 import { fetchFortune } from '../api/fortuneApi';
 import type { FortuneResult } from '../api/types';
 import { fortuneIcon, todayFortuneLogo } from '../assets';
-import { FeatureActionButton, ScreenContainer } from '../components';
+import {
+  BirthdayDatePicker,
+  FeatureActionButton,
+  ScreenContainer,
+} from '../components';
 import type { HomeStackParamList } from '../navigation/types';
 import { colors, homeTileTints, shadows } from '../theme';
 import { fonts } from '../theme/typography';
-import {
-  formatBirthdayInput,
-  formatTodayLabel,
-  parseBirthdayInput,
-  toBirthdayPayload,
-} from '../utils/date';
+import { formatTodayLabel, toBirthdayPayload } from '../utils/date';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Fortune'>;
 
 const BIRTHDAY_KEY = '@mechuri/birthday';
 
 export default function FortuneScreen({ navigation }: Props) {
-  const [birthInput, setBirthInput] = useState('');
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<FortuneResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +40,7 @@ export default function FortuneScreen({ navigation }: Props) {
       if (saved) {
         const date = new Date(saved);
         if (!Number.isNaN(date.getTime())) {
-          setBirthInput(formatBirthdayInput(date));
+          setBirthDate(date);
         }
       }
       setLoading(false);
@@ -50,9 +48,8 @@ export default function FortuneScreen({ navigation }: Props) {
   }, []);
 
   const revealFortune = useCallback(async () => {
-    const parsed = parseBirthdayInput(birthInput);
-    if (!parsed) {
-      setError('생년월일을 1995. 06. 15. 형식으로 입력해 주세요.');
+    if (!birthDate) {
+      setError('생년월일을 선택해 주세요.');
       setResult(null);
       return;
     }
@@ -60,8 +57,8 @@ export default function FortuneScreen({ navigation }: Props) {
     setSubmitting(true);
     setError(null);
     try {
-      const fortune = await fetchFortune(toBirthdayPayload(parsed));
-      await AsyncStorage.setItem(BIRTHDAY_KEY, parsed.toISOString());
+      const fortune = await fetchFortune(toBirthdayPayload(birthDate));
+      await AsyncStorage.setItem(BIRTHDAY_KEY, birthDate.toISOString());
       setResult(fortune);
     } catch (e) {
       if (e instanceof ApiError) {
@@ -75,11 +72,11 @@ export default function FortuneScreen({ navigation }: Props) {
     } finally {
       setSubmitting(false);
     }
-  }, [birthInput]);
+  }, [birthDate]);
 
   return (
     <View style={styles.root}>
-      <ScreenContainer contentStyle={styles.screen}>
+      <ScreenContainer contentStyle={styles.screen} resetScrollOnFocus>
         <Pressable onPress={() => navigation.goBack()} style={styles.back}>
           <Text style={styles.backText}>← 홈</Text>
         </Pressable>
@@ -92,7 +89,7 @@ export default function FortuneScreen({ navigation }: Props) {
             accessibilityLabel="오늘의 운세"
           />
           <Text style={styles.sub}>
-            생일을 입력하면 오늘의 운세와{'\n'}행운의 점심 메뉴를 알려드려요
+            생일을 선택하면 오늘의 운세와{'\n'}행운의 점심 메뉴를 알려드려요
           </Text>
           <View style={styles.dateBadge}>
             <Text style={styles.dateBadgeText}>{formatTodayLabel()}</Text>
@@ -101,21 +98,18 @@ export default function FortuneScreen({ navigation }: Props) {
 
         <View style={styles.inputCard}>
           <Text style={styles.inputLabel}>생년월일</Text>
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              value={birthInput}
-              onChangeText={(t) => {
-                setBirthInput(t);
+          {loading ? (
+            <ActivityIndicator color={colors.orange} style={styles.inputLoader} />
+          ) : (
+            <BirthdayDatePicker
+              value={birthDate}
+              onChange={(date) => {
+                setBirthDate(date);
                 setError(null);
               }}
-              placeholder="1995. 06. 15."
-              placeholderTextColor={colors.taupe}
-              keyboardType="numbers-and-punctuation"
-              editable={!loading && !submitting}
+              disabled={submitting}
             />
-            <Text style={styles.calIcon}>📅</Text>
-          </View>
+          )}
           {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
 
@@ -131,7 +125,7 @@ export default function FortuneScreen({ navigation }: Props) {
             iconImage={fortuneIcon}
             tint={homeTileTints.fortune}
             loading={submitting}
-            disabled={submitting}
+            disabled={submitting || !birthDate}
             onPress={revealFortune}
           />
         )}
@@ -212,7 +206,7 @@ export default function FortuneScreen({ navigation }: Props) {
         ) : (
           <View style={[styles.hintCard, shadows.card]}>
             <Text style={styles.hint}>
-              생년월일을 넣고 「운세 보기」를 누르면 메추리가 오늘의 운세·행운
+              생년월일을 고른 뒤 「운세 보기」를 누르면 메추리가 오늘의 운세·행운
               점수·컬러·점심 메뉴를 알려줘요.
             </Text>
           </View>
@@ -277,23 +271,7 @@ const styles = StyleSheet.create({
     color: colors.brown,
     marginBottom: 10,
   },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.cream,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: colors.tileBorder,
-    paddingHorizontal: 14,
-  },
-  input: {
-    flex: 1,
-    fontFamily: fonts.body,
-    fontSize: 16,
-    color: colors.brown,
-    paddingVertical: 12,
-  },
-  calIcon: { fontSize: 18 },
+  inputLoader: { marginVertical: 12 },
   error: {
     fontFamily: fonts.body,
     fontSize: 13,

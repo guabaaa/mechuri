@@ -20,6 +20,7 @@ export type HomeStackParamList = {
   Ladder: undefined;
   Fortune: undefined;
   NearbyPick: undefined;
+  MealRecord: { prefilledMenu?: string } | undefined;
   Recipe: { menu: string };
 };
 

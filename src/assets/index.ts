@@ -1,5 +1,11 @@
-/** 메추리 캐릭터 — src/assets/images/mechuri.png */
+/** 메추리 캐릭터 — src/assets/images/mechuriMain.png */
 export const mechuriCharacter = require('./images/mechuriMain.png');
+
+/** 성장 단계 — 병아리 */
+export const mechuriChick = require('./images/mechuri.png');
+
+/** 성장 단계 — 어른 */
+export const mechuriAdult = require('./images/mechuriMain.png');
 
 export const mechuriLogo = require('./images/mechuri_logo.png');
 
@@ -33,6 +39,9 @@ export const nearbyPageLogo = require('./images/nearby_logo.png');
 export const notificationIcon = require('./icons/notification.png');
 export const notificationIconRed = require('./icons/notification_red.png');
 export const diceIcon = require('./icons/dice_icon.png');
+export const targetIcon = require('./icons/target_icon.png');
+export const riceIcon = require('./icons/rice_icon.png');
+export const calIcon = require('./icons/cal_icon.png');
 export const ladderIcon = require('./icons/ladder_icon.png');
 export const fortuneIcon = require('./icons/fortune_icon.png');
 export const deliveryIcon = require('./icons/delivery.png');

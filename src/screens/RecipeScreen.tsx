@@ -48,7 +48,7 @@ export default function RecipeScreen({ navigation, route }: Props) {
   }, [load]);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer resetScrollOnFocus>
       <Pressable onPress={() => navigation.goBack()} style={styles.back}>
         <Text style={styles.backText}>← 뒤로</Text>
       </Pressable>

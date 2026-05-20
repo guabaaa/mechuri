@@ -89,7 +89,7 @@ export default function MbtiScreen({ navigation }: Props) {
   if (!weekData || !question) {
     return (
       <View style={styles.root}>
-        <ScreenContainer>
+        <ScreenContainer resetScrollOnFocus>
           <Text style={styles.errorText}>
             {error ?? '질문을 불러올 수 없습니다.'}
           </Text>
@@ -100,7 +100,7 @@ export default function MbtiScreen({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <ScreenContainer contentStyle={styles.screen}>
+      <ScreenContainer contentStyle={styles.screen} resetScrollOnFocus>
         <Pressable onPress={() => navigation.goBack()} style={styles.back}>
           <Text style={styles.backText}>← 홈</Text>
         </Pressable>

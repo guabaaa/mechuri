@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -14,6 +14,7 @@ import { fetchSituationMenu, fetchSituations } from '../api/menusApi';
 import type { SituationSummary } from '../api/types';
 import { MenuRevealOverlay, ScreenContainer } from '../components';
 import { useMenuReveal, type MenuRevealResult } from '../hooks/useMenuReveal';
+import { useResetScrollOnFocus } from '../hooks/useResetScrollOnFocus';
 import type { HomeStackParamList } from '../navigation/types';
 import {
   colors,
@@ -39,9 +40,12 @@ export default function MenuChooseScreen({ navigation }: Props) {
     (screenWidth - homeScreenPadding * 2 - homeTileGap) / 2;
   const { phase, error: revealError, run, finishReveal, isBusy } = useMenuReveal();
 
+  const gridScrollRef = useRef<ScrollView>(null);
   const [situations, setSituations] = useState<SituationSummary[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
+
+  useResetScrollOnFocus(gridScrollRef);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,7 +108,7 @@ export default function MenuChooseScreen({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <ScreenContainer>
+      <ScreenContainer scroll={false}>
         <Pressable onPress={() => navigation.goBack()} style={styles.back}>
           <Text style={styles.backText}>← 뒤로</Text>
         </Pressable>
@@ -123,6 +127,7 @@ export default function MenuChooseScreen({ navigation }: Props) {
           />
         ) : (
           <ScrollView
+            ref={gridScrollRef}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.grid}>
             {rows.map((row, rowIndex) => (

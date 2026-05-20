@@ -5,13 +5,25 @@ import {
   type NearbyMood,
   type WalkRadiusMin,
 } from '../data/nearby';
-import { getKakaoRestApiKey } from '../config/kakaoKey';
+import { ApiError } from '../middleware/errorHandler';
+import {
+  getKakaoRestApiKey,
+  isLikelyNativeKeyMisusedAsRest,
+} from '../config/kakaoKey';
 import {
   kakaoPlaceToNearbyPlace,
   searchFoodPlacesNear,
   type KakaoPlace,
 } from './kakaoLocalService';
-import { pickNearbyAtLocationDevFallback } from './nearbyDevFallback';
+import { isInKorea, normalizeKoreaCoords } from '../utils/geo';
+
+export type NearbyAreaInfo = {
+  /** 예: 서울 강남구 */
+  label: string;
+  city: string;
+  district: string;
+  inKorea: boolean;
+};
 
 const WALK_RADIUS_METERS: Record<WalkRadiusMin, number> = {
   5: 400,
@@ -46,27 +58,76 @@ function inferMenuFromPlace(place: KakaoPlace, mood?: NearbyMood): string {
   return pickRandom(pool);
 }
 
-function reverseGeocodeLabel(lat: number, lng: number): Promise<string> {
+function formatAreaFromRegionDoc(doc: {
+  region_1depth_name?: string;
+  region_2depth_name?: string;
+}): NearbyAreaInfo {
+  const city = doc.region_1depth_name?.trim() ?? '';
+  const district = doc.region_2depth_name?.trim() ?? '';
+  const label = [city, district].filter(Boolean).join(' ') || '현재 위치';
+  return {
+    label,
+    city,
+    district,
+    inKorea: true,
+  };
+}
+
+export async function reverseGeocodeArea(
+  lat: number,
+  lng: number,
+): Promise<NearbyAreaInfo> {
+  const { lat: nLat, lng: nLng } = normalizeKoreaCoords(lat, lng);
+  if (!isInKorea(nLat, nLng)) {
+    return {
+      label: '위치를 확인할 수 없어요',
+      city: '',
+      district: '',
+      inKorea: false,
+    };
+  }
+
   const restKey = getKakaoRestApiKey();
   if (!restKey) {
-    return Promise.resolve('현재 위치');
+    return {
+      label: '현재 위치',
+      city: '',
+      district: '',
+      inKorea: true,
+    };
   }
-  const url = new URL('https://dapi.kakao.com/v2/local/geo/coord2regioncode.json');
-  url.searchParams.set('x', String(lng));
-  url.searchParams.set('y', String(lat));
 
-  return fetch(url, {
-    headers: { Authorization: `KakaoAK ${restKey}` },
-  })
-    .then((res) => (res.ok ? res.json() : null))
-    .then((body: { documents?: { region_2depth_name?: string; region_3depth_name?: string }[] } | null) => {
-      const doc = body?.documents?.[0];
-      if (!doc) {
-        return '현재 위치';
-      }
-      return [doc.region_2depth_name, doc.region_3depth_name].filter(Boolean).join(' ');
-    })
-    .catch(() => '현재 위치');
+  const url = new URL('https://dapi.kakao.com/v2/local/geo/coord2regioncode.json');
+  url.searchParams.set('x', String(nLng));
+  url.searchParams.set('y', String(nLat));
+
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `KakaoAK ${restKey}` },
+    });
+    if (!res.ok) {
+      return { label: '현재 위치', city: '', district: '', inKorea: true };
+    }
+    const body = (await res.json()) as {
+      documents?: {
+        region_1depth_name?: string;
+        region_2depth_name?: string;
+      }[];
+    };
+    const doc = body?.documents?.[0];
+    if (!doc) {
+      return { label: '현재 위치', city: '', district: '', inKorea: true };
+    }
+    return formatAreaFromRegionDoc(doc);
+  } catch {
+    return { label: '현재 위치', city: '', district: '', inKorea: true };
+  }
+}
+
+/** @deprecated reverseGeocodeArea 사용 */
+export async function reverseGeocodeLabel(lat: number, lng: number): Promise<string> {
+  const area = await reverseGeocodeArea(lat, lng);
+  return area.label;
 }
 
 export async function pickNearbyAtLocation(params: {
@@ -78,22 +139,45 @@ export async function pickNearbyAtLocation(params: {
 }) {
   const walkMin = params.radiusWalkMin ?? 10;
   const radiusM = WALK_RADIUS_METERS[walkMin];
-  const placesRaw = await searchFoodPlacesNear(
-    params.lat,
-    params.lng,
+  const { lat, lng } = normalizeKoreaCoords(params.lat, params.lng);
+  const { places: placesRaw, httpStatus } = await searchFoodPlacesNear(
+    lat,
+    lng,
     radiusM,
   );
 
   if (placesRaw.length === 0) {
     const restKey = getKakaoRestApiKey();
-    if (!restKey && process.env.NODE_ENV !== 'production') {
-      return pickNearbyAtLocationDevFallback(params);
+    if (!restKey) {
+      throw new ApiError(
+        503,
+        'KAKAO_KEY_MISSING',
+        '카카오 REST API 키가 없어요. server/.env 에 KAKAO_REST_API_KEY 를 넣거나 auth.local.ts 의 restApiKey(네이티브 키 아님)를 설정한 뒤 서버를 재시작해 주세요.',
+      );
+    }
+    if (httpStatus) {
+      const misuse = restKey && isLikelyNativeKeyMisusedAsRest();
+      throw new ApiError(
+        502,
+        'KAKAO_LOCAL_ERROR',
+        httpStatus === 4031
+          ? '카카오 콘솔에서 「지도/로컬」(OPEN_MAP_AND_LOCAL) 서비스를 활성화해 주세요. developers.kakao.com → 내 애플리케이션 → 제품 설정'
+          : httpStatus === 403
+            ? misuse
+              ? '네이티브 앱 키가 아닌 REST API 키를 써야 해요. 카카오 디벨로퍼스 → 앱 키 → REST API 키를 server/.env 에 넣어 주세요.'
+              : '카카오 REST API 키가 거부됐어요. REST API 키·IP 제한·로컬 API 사용 설정을 확인해 주세요.'
+            : `카카오 로컬 API 오류(${httpStatus}). 잠시 후 다시 시도해 주세요.`,
+      );
     }
     return null;
   }
 
-  const areaLabelBase = await reverseGeocodeLabel(params.lat, params.lng);
+  const area = await reverseGeocodeArea(lat, lng);
+  const areaLabelBase = area.label;
   const topPlaces = placesRaw.slice(0, 5);
+  if (topPlaces.length === 0) {
+    return null;
+  }
   const anchor = pickRandom(topPlaces);
   let menu = inferMenuFromPlace(anchor, params.mood);
   if (params.exclude && menu === params.exclude && topPlaces.length > 1) {
@@ -113,8 +197,8 @@ export async function pickNearbyAtLocation(params: {
     districtId: 'gps',
     districtLabel: areaLabelBase,
     radiusWalkMin: walkMin,
-    userLat: params.lat,
-    userLng: params.lng,
+    userLat: lat,
+    userLng: lng,
     places: topPlaces.slice(0, 3).map(kakaoPlaceToNearbyPlace),
   };
 }

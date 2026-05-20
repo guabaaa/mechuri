@@ -161,7 +161,7 @@ export default function LadderScreen({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <ScreenContainer contentStyle={styles.screen}>
+      <ScreenContainer contentStyle={styles.screen} resetScrollOnFocus>
         <Pressable
           onPress={() => {
             if (phase === 'playing') {

@@ -6,7 +6,7 @@ import {
   fetchSituationMenu,
   fetchTodayMenu,
 } from '../api/menusApi';
-import { diceIcon } from '../assets';
+import { diceIcon, riceIcon } from '../assets';
 import {
   FeatureActionButton,
   MechuriPickHeader,
@@ -114,7 +114,7 @@ export default function MenuResultScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.root}>
-      <ScreenContainer contentStyle={styles.screen}>
+      <ScreenContainer contentStyle={styles.screen} resetScrollOnFocus>
         <MechuriPickHeader />
 
         <View style={styles.ribbon}>
@@ -173,6 +173,15 @@ export default function MenuResultScreen({ navigation, route }: Props) {
             loading={phase === 'loading'}
             disabled={isBusy}
             onPress={redraw}
+          />
+
+          <FeatureActionButton
+            label="오늘 밥친구에 올리기"
+            iconImage={riceIcon}
+            tint={homeTileTints.meal}
+            onPress={() =>
+              navigation.navigate('MealRecord', { prefilledMenu: menu })
+            }
           />
 
           {source !== 'delivery' ? (
